@@ -9,6 +9,6 @@ typedef enum {
     INTERPRET_RUNTIME_ERROR
 } InterpretResult;
 
-InterpretResult interpret(const StmtList *statements);
+InterpretResult interpret(const stmt_list_t *statements);
 
 #endif

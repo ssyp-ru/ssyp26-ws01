@@ -14,19 +14,19 @@ typedef struct {
         double number;
         bool boolean;
     } val;
-} Value;
+} value_t;
 
-Value make_number_value(double number);
-Value make_bool_value(bool boolean);
+value_t make_number_value(double number);
+value_t make_bool_value(bool boolean);
 
-bool value_is_number(Value value);
-bool value_is_bool(Value value);
+bool value_is_number(value_t value);
+bool value_is_bool(value_t value);
 
-double value_as_number(Value value);
-bool value_as_bool(Value value);
+double value_as_number(value_t value);
+bool value_as_bool(value_t value);
 
-const char *value_type_name(Value value);
-void print_value(Value value);
-bool values_equal(Value a, Value b);
+const char *value_type_name(value_t value);
+void print_value(value_t value);
+bool values_equal(value_t a, value_t b);
 
 #endif

@@ -35,31 +35,31 @@ typedef struct {
     const char *start;
     int length;
     int line;
-} Token;
+} token_t;
 
 typedef struct {
     const char *start;
     const char *current;
     int line;
     bool had_error;
-} Lexer;
+} lexer_t;
 
-void lexer_init(Lexer *lexer, const char *source);
-bool lexer_is_at_end(const Lexer *lexer);
-bool lexer_next_token(Lexer *lexer, Token *out);
+void lexer_init(lexer_t *lexer, const char *source);
+bool lexer_is_at_end(const lexer_t *lexer);
+bool lexer_next_token(lexer_t *lexer, token_t *out);
 const char *token_type_name(TokenType type);
 
 typedef struct {
-    Token *items;
+    token_t *items;
     int count;
     int capacity;
     bool had_error;
-} TokenList;
+} token_list_t;
 
-void token_list_init(TokenList *list);
-void token_list_push(TokenList *list, Token token);
-void token_list_free(TokenList *list);
+void token_list_init(token_list_t *list);
+void token_list_push(token_list_t *list, token_t token);
+void token_list_free(token_list_t *list);
 
-TokenList lexer_scan_all(const char *source);
+token_list_t lexer_scan_all(const char *source);
 
 #endif

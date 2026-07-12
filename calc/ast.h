@@ -5,7 +5,7 @@
 #include "lexer.h"
 #include "value.h"
 
-typedef struct Expr Expr;
+typedef struct expr_t expr_t;
 
 typedef enum {
     EXPR_LITERAL,
@@ -14,39 +14,39 @@ typedef enum {
     EXPR_LOGICAL
 } ExprType;
 
-struct Expr {
+struct expr_t {
     ExprType type;
     int line;
 
     union {
         struct {
-            Value value;
+            value_t value;
         } literal;
 
         struct {
             TokenType op;
-            Expr *operand;
+            expr_t *operand;
         } unary;
 
         struct {
             TokenType op;
-            Expr *l;
-            Expr *r;
+            expr_t *l;
+            expr_t *r;
         } binary;
 
         struct {
             TokenType op;
-            Expr *l;
-            Expr *r;
+            expr_t *l;
+            expr_t *r;
         } logical;
     } val;
 };
 
-Expr *make_literal_expr(Value value, int line);
-Expr *make_unary_expr(TokenType op, Expr *operand, int line);
-Expr *make_binary_expr(TokenType op, Expr *left, Expr *right, int line);
-Expr *make_logical_expr(TokenType op, Expr *left, Expr *right, int line);
-void free_expr(Expr *expr);
+expr_t *make_literal_expr(value_t value, int line);
+expr_t *make_unary_expr(TokenType op, expr_t *operand, int line);
+expr_t *make_binary_expr(TokenType op, expr_t *left, expr_t *right, int line);
+expr_t *make_logical_expr(TokenType op, expr_t *left, expr_t *right, int line);
+void free_expr(expr_t *expr);
 
 typedef enum {
     STMT_PRINT,
@@ -56,17 +56,17 @@ typedef enum {
 typedef struct {
     StmtType type;
     int line;
-    Expr *expression;
-} Stmt;
+    expr_t *expression;
+} stmt_t;
 
 typedef struct {
-    Stmt *items;
+    stmt_t *items;
     int count;
     int capacity;
-} StmtList;
+} stmt_list_t;
 
-void stmt_list_init(StmtList *list);
-void stmt_list_push(StmtList *list, Stmt stmt);
-void stmt_list_free(StmtList *list);
+void stmt_list_init(stmt_list_t *list);
+void stmt_list_push(stmt_list_t *list, stmt_t stmt);
+void stmt_list_free(stmt_list_t *list);
 
 #endif

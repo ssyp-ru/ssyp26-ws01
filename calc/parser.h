@@ -6,12 +6,12 @@
 #include "lexer.h"
 
 typedef struct {
-    const TokenList *tokens;
+    const token_list_t *tokens;
     int current;
     bool had_error;
-} Parser;
+} parser_t;
 
-void parser_init(Parser *parser, const TokenList *tokens);
-StmtList parser_parse_program(Parser *parser);
+void parser_init(parser_t *parser, const token_list_t *tokens);
+stmt_list_t parser_parse_program(parser_t *parser);
 
 #endif
