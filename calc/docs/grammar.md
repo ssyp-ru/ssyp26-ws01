@@ -30,13 +30,13 @@ Keywords: `true`, `false`, `print`, `assert`.
 
 ## Operator precedence
 
-1: ||
-2: &&
-3: == !=
-4: < <= > >=
-5: + - (binary)
-6: * /
-7: ! - (unary)
+1. ||
+2. &&
+3. == !=
+4. < <= > >=
+5. + - (binary)
+6. * /
+7. ! - (unary)
 
 
 ## Syntax grammar
@@ -73,15 +73,15 @@ primary        → NUMBER
 
 ## Example of wrong grammar
 ```
-expression     → literal
+expression     → grouping
                | unary
                | binary
-               | grouping ;
+               | literal;
 
-literal        → NUMBER | STRING | "true" | "false" | "nil" ;
 grouping       → "(" expression ")" ;
 unary          → ( "-" | "!" ) expression ;
 binary         → expression operator expression ;
 operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
                | "+"  | "-"  | "*" | "/" ;
+literal        → NUMBER | "true" | "false" | "nil" ;
 ```

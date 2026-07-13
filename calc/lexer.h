@@ -27,7 +27,12 @@ typedef enum {
     TOKEN_TRUE,
     TOKEN_FALSE,
     TOKEN_PRINT,
-    TOKEN_ASSERT
+    TOKEN_ASSERT,
+
+    // Special token type showing that we have lexer error in this string.
+    // Token list with such token cannot be passed to parser,
+    // but still can be used for something like syntax highlight.
+    TOKEN_ERROR
 } TokenType;
 
 typedef struct {
@@ -41,13 +46,7 @@ typedef struct {
     const char *start;
     const char *current;
     int line;
-    bool had_error;
 } lexer_t;
-
-void lexer_init(lexer_t *lexer, const char *source);
-bool lexer_is_at_end(const lexer_t *lexer);
-bool lexer_next_token(lexer_t *lexer, token_t *out);
-const char *token_type_name(TokenType type);
 
 typedef struct {
     token_t *items;
@@ -55,10 +54,6 @@ typedef struct {
     int capacity;
     bool had_error;
 } token_list_t;
-
-void token_list_init(token_list_t *list);
-void token_list_push(token_list_t *list, token_t token);
-void token_list_free(token_list_t *list);
 
 token_list_t lexer_scan_all(const char *source);
 
