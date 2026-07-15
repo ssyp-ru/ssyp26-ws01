@@ -54,4 +54,12 @@ typedef struct {
     int line;
 } token_t;
 
+typedef struct {
+    token_t* ptr;
+    int length;
+    int capacity;
+} tokens_t;
+
+bool tokenize(tokens_t* tokens, const char* code);
+
 #endif
