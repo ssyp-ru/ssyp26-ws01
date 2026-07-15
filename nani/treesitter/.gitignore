@@ -1,0 +1,9 @@
+/src/parser.c
+/src/node-types.json
+/src/grammar.json
+/src/tree_sitter/
+package.json
+
+node_modules/
+*.so
+*.o
