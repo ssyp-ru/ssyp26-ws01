@@ -3,8 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
-#define IS_ALPHA(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
+static bool is_digit(c) {
+	return c >= '0' && c <= '9';
+}
+
+static bool is_alpha(c) {
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+}
+
+static bool is_alnum(c) {
+	return is_digit(c) || is_alpha(c);
+}
 
 static void add_token(tokens_t* tokens, const char* start, int len, int line, TokenType type) {
 	if (!tokens->ptr) {
@@ -80,10 +89,10 @@ bool tokenize(tokens_t* tokens, const char* code) {
 		char c = code[i];
 
 		// special cases
-		if (IS_DIGIT(c)) { // number
+		if (is_digit(c)) { // number
 			int len = 0;
 			bool seen_point = false;
-			while (IS_DIGIT(c) || (!seen_point && code[i + len] == '.')) {
+			while (is_digit(code[i + len]) || (!seen_point && code[i + len] == '.')) {
 				if (code[i + len] == '.') seen_point = true;
 				len++;
 			}
@@ -104,9 +113,9 @@ bool tokenize(tokens_t* tokens, const char* code) {
 
 			continue;
 
-        } else if (IS_ALPHA(c) || c == '_') { // identifier
+        } else if (is_alpha(c) || c == '_') { // identifier
 			int len = 0;
-			while (IS_ALPHA(c) || c == '_' || IS_DIGIT(c)) len++;
+			while (is_alnum(code[i + len]) || code[i + len] == '_') len++;
 
 			add_token(tokens, &code[i], len, TOKEN_IDENTIFIER, line);
 			i += len;
