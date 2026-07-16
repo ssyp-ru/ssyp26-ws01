@@ -1,6 +1,0 @@
-#ifndef CALC_COMMON_H
-#define CALC_COMMON_H
-
-void report_error(int line, const char *where, const char *message);
-
-#endif

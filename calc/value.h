@@ -1,8 +1,6 @@
 #ifndef CALC_VALUE_H
 #define CALC_VALUE_H
 
-#include "common.h"
-
 typedef enum {
     VAL_NUMBER,
     VAL_BOOL

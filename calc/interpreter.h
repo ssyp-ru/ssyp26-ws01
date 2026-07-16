@@ -1,14 +1,8 @@
 #ifndef CALC_INTERPRETER_H
 #define CALC_INTERPRETER_H
 
-#include "ast.h"
-#include "common.h"
+#include "parser.h"
 
-typedef enum {
-    INTERPRET_OK,
-    INTERPRET_RUNTIME_ERROR
-} InterpretResult;
-
-InterpretResult interpret(const stmt_list_t *statements);
+int interpret(const stmt_list_t *statements);
 
 #endif

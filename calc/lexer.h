@@ -1,8 +1,6 @@
 #ifndef CALC_LEXER_H
 #define CALC_LEXER_H
 
-#include "common.h"
-
 typedef enum {
     TOKEN_LEFT_PAREN,
     TOKEN_RIGHT_PAREN,
@@ -37,24 +35,18 @@ typedef enum {
 
 typedef struct {
     TokenType type;
-    const char *start;
-    int length;
+    int start;
+    int end;
     int line;
 } token_t;
 
 typedef struct {
-    const char *start;
-    const char *current;
-    int line;
-} lexer_t;
-
-typedef struct {
-    token_t *items;
-    int count;
+    token_t *data;
+    int size;
     int capacity;
     bool had_error;
 } token_list_t;
 
-token_list_t lexer_scan_all(const char *source);
+token_list_t tokenizer(const char *source);
 
 #endif

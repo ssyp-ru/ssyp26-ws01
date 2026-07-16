@@ -34,8 +34,8 @@ Keywords: `true`, `false`, `print`, `assert`.
 2. &&
 3. == !=
 4. < <= > >=
-5. + - (binary)
-6. * /
+5. `+ -` (binary)
+6. `*` /
 7. ! - (unary)
 
 
