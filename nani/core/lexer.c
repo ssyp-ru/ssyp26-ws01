@@ -1,7 +1,5 @@
 #include "lexer.h"
 #include "c_utils/utils.h"
-
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -21,12 +19,12 @@ static void add_token(tokens_t* tokens, const char* start, int len, int line, to
 	if (!tokens->ptr) {
 		tokens->length = 0;
 		tokens->capacity = 16;
-		tokens->ptr = malloc(tokens->capacity * sizeof(token_t));
+		tokens->ptr = (token_t*) malloc(tokens->capacity * sizeof(token_t));
 	}
 
 	if (tokens->length == tokens->capacity) {
 		tokens->capacity *= 2;
-		tokens->ptr = realloc(tokens->ptr, tokens->capacity * sizeof(token_t));
+		tokens->ptr = (token_t*) realloc(tokens->ptr, tokens->capacity * sizeof(token_t));
 	}
 
 	token_t* tok = &tokens->ptr[tokens->length++];

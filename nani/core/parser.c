@@ -14,21 +14,21 @@ static stmt_t* add_stmt(stmt_list_t* ast) {
 	if (!ast->items) {
 		ast->count = 0;
 		ast->capacity = 16;
-		ast->items = malloc(ast->capacity * sizeof(stmt_t*));
+		ast->items = (stmt_t**) malloc(ast->capacity * sizeof(stmt_t*));
 	}
 
 	if (ast->count == ast->capacity) {
 		ast->capacity *= 2;
-		ast->items = realloc(ast->items, ast->capacity * sizeof(stmt_t*));
+		ast->items = (stmt_t**) realloc(ast->items, ast->capacity * sizeof(stmt_t*));
 	}
 
-    stmt_t* stmt = malloc(sizeof(stmt_t));
+    stmt_t* stmt = (stmt_t*) malloc(sizeof(stmt_t));
 	ast->items[ast->count++] = stmt;
     return stmt;
 }
 
 static expr_t* make_logical_expr(expr_t* left, token_t op, expr_t* right) {
-	expr_t* out = malloc(sizeof(expr_t));
+	expr_t* out = (expr_t*) malloc(sizeof(expr_t));
 	out->type = EXPR_LOGICAL;
 	out->value.logical.op = op;
 	out->value.logical.left = left;
@@ -37,7 +37,7 @@ static expr_t* make_logical_expr(expr_t* left, token_t op, expr_t* right) {
 }
 
 static expr_t* make_binary_expr(expr_t* left, token_t op, expr_t* right) {
-	expr_t* out = malloc(sizeof(expr_t));
+	expr_t* out = (expr_t*) malloc(sizeof(expr_t));
 	out->type = EXPR_BINARY;
 	out->value.binary.op = op;
 	out->value.binary.left = left;
@@ -171,7 +171,7 @@ expr_t* parse_unary(tokens_t* tokens, int* pos) {
 	if (tok->type != TOKEN_BANG && tok->type != TOKEN_MINUS) return parse_primary(tokens, pos);
 	(*pos)++;
 
-	expr_t* out = malloc(sizeof(expr_t));
+	expr_t* out = (expr_t*) malloc(sizeof(expr_t));
 	out->type = EXPR_UNARY;
 	out->value.unary.op = *tok;
 	out->value.unary.right = parse_unary(tokens, pos);
@@ -193,7 +193,7 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
 		return expr;
 	}
 
-	expr_t* out = malloc(sizeof(expr_t));
+	expr_t* out = (expr_t*) malloc(sizeof(expr_t));
 	out->type = EXPR_LITERAL;
     out->value.literal.lexeme = *tok;
 
