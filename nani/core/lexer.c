@@ -15,7 +15,7 @@ static bool is_alnum(c) {
 	return is_digit(c) || is_alpha(c);
 }
 
-static void add_token(tokens_t* tokens, const char* start, int len, int line, token_type_t type) {
+static void add_token(tokens_t* tokens, const char* start, int len, int line, token_kind_t type) {
 	if (!tokens->ptr) {
 		tokens->length = 0;
 		tokens->capacity = 16;
@@ -36,7 +36,7 @@ static void add_token(tokens_t* tokens, const char* start, int len, int line, to
 
 typedef struct {
 	const char* pattern;
-	token_type_t type;
+	token_kind_t type;
 	int len;
 } pattern_t;
 
