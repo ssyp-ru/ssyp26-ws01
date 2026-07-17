@@ -18,7 +18,7 @@ typedef struct {
         bool boolean;
         double number;
         obj_t *object;
-    } as;
+    } kind;
 } value_t;
 
 
