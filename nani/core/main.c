@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
     tokens_t tokens = { 0 };
     if (!tokenize(&tokens, code)) return 1;
 
-    stmt_list_t ast;
+    stmt_list_t ast = { 0 };
     parse_program(&ast, &tokens);
     free(code);
 
