@@ -1,13 +1,12 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include "parser.h"
 #include "lexer.h"
 #include "c_utils/utils.h"
 
-[[noreturn]] static void err(tokens_t* tokens, int* pos, const char* text) {
+static void err(tokens_t* tokens, int* pos, const char* text) {
 	token_t* tok = &tokens->ptr[*pos];
 
-	printf("Parser error at token %d: %s\n", *pos, text);
+	log_error("Parser error at token %d: %s\n", *pos, text);
 	exit(1);
 }
 

@@ -1,4 +1,6 @@
 #include "lexer.h"
+#include "c_utils/utils.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -139,20 +141,24 @@ bool tokenize(tokens_t* tokens, const char* code) {
             continue;
         }
 
+
+		int parsed = 0;
 		for (int pi = 0; pi < sizeof(patterns) / sizeof(pattern_t); pi++) {
 			pattern_t* pat = &patterns[pi];
 
 			if (!memcmp(pat->pattern, &code[i], pat->len)) {
 				add_token(tokens, &code[i], pat->len, pat->type, line);
 				i += pat->len;
-				goto loop_end;
+				parsed = 1;
+				break;
 			}
 		}
 
-		log_error("Invalid char on line %d: '%c'\n", line, c);
-		return false;
+		if (!parsed) {
+			log_error("Invalid char on line %d: '%c'\n", line, c);
+			return false;
+		}
 
-loop_end: // im sorry
 	}
 
 	return true;
