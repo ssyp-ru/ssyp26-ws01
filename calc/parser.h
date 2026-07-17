@@ -4,6 +4,12 @@
 #include "lexer.h"
 #include "value.h"
 
+typedef struct lexer {
+    token_array_t tokens;
+    int cur;
+    char *orig;
+} lexer_t;
+
 typedef struct expr_t expr_t;
 
 typedef enum {
@@ -23,28 +29,28 @@ struct expr_t {
         } literal;
 
         struct {
-            TokenType op;
+            token_type op;
             expr_t *operand;
         } unary;
 
         struct {
-            TokenType op;
+            token_type op;
             expr_t *l;
             expr_t *r;
         } binary;
 
         struct {
-            TokenType op;
+            token_type op;
             expr_t *l;
             expr_t *r;
         } logical;
     } val;
 };
-
-expr_t *make_literal_expr(value_t value, int line);
-expr_t *make_unary_expr(TokenType op, expr_t *operand, int line);
-expr_t *make_binary_expr(TokenType op, expr_t *left, expr_t *right, int line);
-expr_t *make_logical_expr(TokenType op, expr_t *left, expr_t *right, int line);
+                        
+expr_t *make_literal_expr(float value);
+expr_t *make_unary_expr(token_type op, expr_t *operand);
+expr_t *make_binary_expr(token_type op, expr_t *left, expr_t *right);
+expr_t *make_logical_expr(token_type op, expr_t *left, expr_t *right);
 void free_expr(expr_t *expr);
 
 typedef enum {
@@ -68,6 +74,7 @@ void stmt_list_init(stmt_list_t *list);
 void stmt_list_push(stmt_list_t *list, stmt_t stmt);
 void stmt_list_free(stmt_list_t *list);
 
-stmt_list_t parser_parse_program(token_list_t *tokens);
+expr_t * p_expr(lexer_t *lexer);
+void print_ast(expr_t *expr);
 
 #endif

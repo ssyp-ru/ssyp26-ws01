@@ -31,12 +31,12 @@ typedef enum {
     // Token list with such token cannot be passed to parser,
     // but still can be used for something like syntax highlight.
     TOKEN_ERROR
-} TokenType;
+} token_type;
 
 typedef struct {
-    TokenType type;
+    token_type t;
     int start;
-    int end;
+    int finish;
     int line;
 } token_t;
 
@@ -44,9 +44,25 @@ typedef struct {
     token_t *data;
     int size;
     int capacity;
-    bool had_error;
+    int had_error;
 } token_list_t;
 
-token_list_t tokenizer(const char *source);
+
+
+typedef struct token_array {
+	token_t *data;
+	int size;
+	int capacity;
+} token_array_t;  
+
+void init_slice(token_array_t *a);
+
+void destroy_slice(token_array_t *a);
+
+void push_back(token_array_t *a, token_t value);
+
+token_t pop_back(token_array_t *a);
+
+token_array_t tokenizer(const char *source);
 
 #endif
