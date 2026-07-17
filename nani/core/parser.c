@@ -27,6 +27,24 @@ static stmt_t* add_stmt(stmt_list_t* ast) {
     return stmt;
 }
 
+static expr_t* make_logical_expr(expr_t* left, token_t op, expr_t* right) {
+	expr_t* out = malloc(sizeof(expr_t));
+	out->type = EXPR_LOGICAL;
+	out->value.logical.op = op;
+	out->value.logical.left = left;
+	out->value.logical.right = right;
+	return out;
+}
+
+static expr_t* make_binary_expr(expr_t* left, token_t op, expr_t* right) {
+	expr_t* out = malloc(sizeof(expr_t));
+	out->type = EXPR_BINARY;
+	out->value.binary.op = op;
+	out->value.binary.left = left;
+	out->value.binary.right = right;
+	return out;
+}
+
 void free_ast(stmt_list_t* ast) {
 	// TODO
 }
@@ -73,13 +91,7 @@ expr_t* parse_or(tokens_t* tokens, int* pos) {
 	(*pos)++;
 
 	expr_t* right = parse_and(tokens, pos);
-
-	expr_t* out = malloc(sizeof(expr_t));
-	out->type = EXPR_LOGICAL;
-	out->value.logical.op = *tok;
-	out->value.logical.left = left;
-	out->value.logical.right = right;
-	return out;
+	return make_logical_expr(left, *tok, right);
 }
 
 expr_t* parse_and(tokens_t* tokens, int* pos) {
@@ -90,13 +102,7 @@ expr_t* parse_and(tokens_t* tokens, int* pos) {
 	(*pos)++;
 
 	expr_t* right = parse_equality(tokens, pos);
-
-	expr_t* out = malloc(sizeof(expr_t));
-	out->type = EXPR_LOGICAL;
-	out->value.logical.op = *tok;
-	out->value.logical.left = left;
-	out->value.logical.right = right;
-	return out;
+	return make_logical_expr(left, *tok, right);
 }
 
 expr_t* parse_equality(tokens_t* tokens, int* pos) {
@@ -107,13 +113,7 @@ expr_t* parse_equality(tokens_t* tokens, int* pos) {
 	(*pos)++;
 
 	expr_t* right = parse_comparison(tokens, pos);
-
-	expr_t* out = malloc(sizeof(expr_t));
-	out->type = EXPR_LOGICAL;
-	out->value.logical.op = *tok;
-	out->value.logical.left = left;
-	out->value.logical.right = right;
-	return out;
+	return make_logical_expr(left, *tok, right);
 }
 
 expr_t* parse_comparison(tokens_t* tokens, int* pos) {
@@ -124,13 +124,7 @@ expr_t* parse_comparison(tokens_t* tokens, int* pos) {
 	(*pos)++;
 
 	expr_t* right = parse_term(tokens, pos);
-
-	expr_t* out = malloc(sizeof(expr_t));
-	out->type = EXPR_LOGICAL;
-	out->value.logical.op = *tok;
-	out->value.logical.left = left;
-	out->value.logical.right = right;
-	return out;
+	return make_logical_expr(left, *tok, right);
 }
 
 expr_t* parse_term(tokens_t* tokens, int* pos) {
@@ -141,13 +135,7 @@ expr_t* parse_term(tokens_t* tokens, int* pos) {
 	(*pos)++;
 
 	expr_t* right = parse_factor(tokens, pos);
-
-	expr_t* out = malloc(sizeof(expr_t));
-	out->type = EXPR_BINARY;
-	out->value.binary.op = *tok;
-	out->value.binary.left = left;
-	out->value.binary.right = right;
-	return out;
+	return make_binary_expr(left, *tok, right);
 }
 
 expr_t* parse_factor(tokens_t* tokens, int* pos) {
@@ -158,13 +146,7 @@ expr_t* parse_factor(tokens_t* tokens, int* pos) {
 	(*pos)++;
 
 	expr_t* right = parse_unary(tokens, pos);
-
-	expr_t* out = malloc(sizeof(expr_t));
-	out->type = EXPR_BINARY;
-	out->value.binary.op = *tok;
-	out->value.binary.left = left;
-	out->value.binary.right = right;
-	return out;
+	return make_binary_expr(left, *tok, right);
 }
 
 expr_t* parse_unary(tokens_t* tokens, int* pos) {
