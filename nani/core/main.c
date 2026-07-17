@@ -11,7 +11,7 @@ static char* read_full(FILE* fp) {
 	long size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 
-	char* output = malloc(size + 1);
+	char* output = (char*) malloc(size + 1);
 	fread(output, 1, size, fp);
 	output[size] = 0;
 
