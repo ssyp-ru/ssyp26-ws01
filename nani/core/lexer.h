@@ -45,10 +45,10 @@ typedef enum {
     TOKEN_THIS,
     TOKEN_TRUE,
     TOKEN_WHILE,
-} token_type_t;
+} token_kind_t;
 
 typedef struct {
-    token_type_t type;
+    token_kind_t type;
     const char *start;
     int length;
     int line;

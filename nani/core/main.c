@@ -30,11 +30,11 @@ static value_t eval(expr_t* expr) {
 	if (expr->kind == EXPR_UNARY) {
 		value_t inner = eval(expr->unary.operand);
 
-		if (expr->unary.op == MINUS) {
+		if (expr->unary.op == TOKEN_MINUS) {
 			if (inner.kind != VAL_NUM) rterr("Expected number after unary minus");
 
 			inner.num = -inner.num;
-		} else if (expr->unary.op == BANG) {
+		} else if (expr->unary.op == TOKEN_BANG) {
 			if (inner.kind != VAL_BOOL) rterr("Expected bool after unary bang");
 
 			inner.boolean = !inner.boolean;
@@ -52,29 +52,27 @@ static value_t eval(expr_t* expr) {
 
 static const char* token_name(token_kind_t kind) {
 #define A(k) if (kind == k) return #k;
-	A(NUMBER)
-	A(SEMICOLON)
-	A(LINE_COMMENT)
-	A(ADD)
-	A(MUL)
-	A(DIV)
-	A(MINUS)
-	A(PAR_OPEN)
-	A(PAR_CLOSE)
-	A(BANG)
-	A(TRUE)
-	A(FALSE)
-	A(AND)
-	A(OR)
-	A(EQU)
-	A(NEQ)
-	A(LESS)
-	A(LESS_EQ)
-	A(GREATER)
-	A(GREATER_EQ)
-	A(PRINT)
-	A(ASSERT)
-	A(ENDOFFILE)
+	A(TOKEN_NUMBER)
+	A(TOKEN_SEMICOLON)
+	A(TOKEN_PLUS)
+	A(TOKEN_STAR)
+	A(TOKEN_SLASH)
+	A(TOKEN_MINUS)
+	A(TOKEN_LEFT_PAREN)
+	A(TOKEN_RIGHT_PAREN)
+	A(TOKEN_BANG)
+	A(TOKEN_TRUE)
+	A(TOKEN_FALSE)
+	A(TOKEN_AND)
+	A(TOKEN_OR)
+	A(TOKEN_EQ_EQ)
+	A(TOKEN_BANG_EQ)
+	A(TOKEN_LESS)
+	A(TOKEN_LESS_EQ)
+	A(TOKEN_GREATER)
+	A(TOKEN_GREATER_EQ)
+	A(TOKEN_PRINT)
+	A(TOKEN_ASSERT)
 
 	assert(false);
 #undef A

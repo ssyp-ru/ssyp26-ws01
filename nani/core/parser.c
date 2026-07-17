@@ -51,29 +51,29 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
 	token_t* tok = &tokens->ptr[*pos];
 	(*pos)++;
 
-	if (tok->kind == ASSERT) stmt->kind = STMT_ASSERT;
-	else if (tok->kind == PRINT) stmt->kind = STMT_PRINT;
+	if (tok->kind == TOKEN_ASSERT) stmt->kind = STMT_ASSERT;
+	else if (tok->kind == TOKEN_PRINT) stmt->kind = STMT_PRINT;
 	else err(tokens, pos, "Expected statement (assert or print)");
 	
 	stmt->expr = parse_or(tokens, pos);
 
 	tok = &tokens->ptr[*pos];
 	(*pos)++;
-	if (tok->kind != SEMICOLON) err(tokens, pos, "Expected semicolon");
+	if (tok->kind != TOKEN_SEMICOLON) err(tokens, pos, "Expected semicolon");
 }
 
 expr_t* parse_or(tokens_t* tokens, int* pos) {
 	expr_t* left = parse_and(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
-	if (tok->kind != OR) return left;
+	if (tok->kind != TOKEN_OR) return left;
 	(*pos)++;
 
 	expr_t* right = parse_and(tokens, pos);
 
 	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_BINARY;
-	out->binary.op = OR;
+	out->binary.op = TOKEN_OR;
 	out->binary.l = left;
 	out->binary.r = right;
 	return out;
@@ -83,14 +83,14 @@ expr_t* parse_and(tokens_t* tokens, int* pos) {
 	expr_t* left = parse_equality(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
-	if (tok->kind != AND) return left;
+	if (tok->kind != TOKEN_AND) return left;
 	(*pos)++;
 
 	expr_t* right = parse_equality(tokens, pos);
 
 	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_BINARY;
-	out->binary.op = AND;
+	out->binary.op = TOKEN_AND;
 	out->binary.l = left;
 	out->binary.r = right;
 	return out;
@@ -100,7 +100,7 @@ expr_t* parse_equality(tokens_t* tokens, int* pos) {
 	expr_t* left = parse_comparison(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
-	if (tok->kind != EQU && tok->kind != NEQ) return left;
+	if (tok->kind != TOKEN_EQ_EQ && tok->kind != TOKEN_BANG_EQ) return left;
 	(*pos)++;
 
 	expr_t* right = parse_comparison(tokens, pos);
@@ -117,7 +117,7 @@ expr_t* parse_comparison(tokens_t* tokens, int* pos) {
 	expr_t* left = parse_term(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
-	if (tok->kind != LESS && tok->kind != LESS_EQ && tok->kind != GREATER && tok->kind != GREATER_EQ) return left;
+	if (tok->kind != TOKEN_LESS && tok->kind != TOKEN_LESS_EQ && tok->kind != TOKEN_GREATER && tok->kind != TOKEN_GREATER_EQ) return left;
 	(*pos)++;
 
 	expr_t* right = parse_term(tokens, pos);
@@ -134,7 +134,7 @@ expr_t* parse_term(tokens_t* tokens, int* pos) {
 	expr_t* left = parse_factor(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
-	if (tok->kind != ADD && tok->kind != MINUS) return left;
+	if (tok->kind != TOKEN_PLUS && tok->kind != TOKEN_MINUS) return left;
 	(*pos)++;
 
 	expr_t* right = parse_factor(tokens, pos);
@@ -151,7 +151,7 @@ expr_t* parse_factor(tokens_t* tokens, int* pos) {
 	expr_t* left = parse_unary(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
-	if (tok->kind != MUL && tok->kind != DIV) return left;
+	if (tok->kind != TOKEN_STAR && tok->kind != TOKEN_SLASH) return left;
 	(*pos)++;
 
 	expr_t* right = parse_unary(tokens, pos);
@@ -166,7 +166,7 @@ expr_t* parse_factor(tokens_t* tokens, int* pos) {
 
 expr_t* parse_unary(tokens_t* tokens, int* pos) {
 	token_t* tok = &tokens->ptr[*pos];
-	if (tok->kind != BANG && tok->kind != MINUS) return parse_primary(tokens, pos);
+	if (tok->kind != TOKEN_BANG && tok->kind != TOKEN_MINUS) return parse_primary(tokens, pos);
 	(*pos)++;
 
 	expr_t* out = malloc(sizeof(expr_t));
@@ -180,12 +180,12 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
 	token_t* tok = &tokens->ptr[*pos];
 	(*pos)++;
 
-	if (tok->kind == PAR_OPEN) {
+	if (tok->kind == TOKEN_LEFT_PAREN) {
 		expr_t* expr = parse_or(tokens, pos);
 
 		token_t* tok2 = &tokens->ptr[*pos];
 		(*pos)++;
-		if (tok2->kind != PAR_CLOSE) err(tokens, pos, "Expected right parentheses");
+		if (tok2->kind != TOKEN_RIGHT_PAREN) err(tokens, pos, "Expected right parentheses");
 
 		return expr;
 	}
@@ -193,7 +193,7 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
 	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_LITERAL;
 
-	if (tok->kind == NUMBER) {
+	if (tok->kind == TOKEN_NUMBER) {
 		char* endptr = (char*) &tokens->code[tok->start + tok->len];
 
 		out->literal.val.kind = VAL_NUM;
@@ -201,9 +201,9 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
 		return out;
 	}
 
-	if (tok->kind == TRUE || tok->kind == FALSE) {
+	if (tok->kind == TOKEN_TRUE || tok->kind == TOKEN_FALSE) {
 		out->literal.val.kind = VAL_BOOL;
-		out->literal.val.boolean = tok->kind == TRUE;
+		out->literal.val.boolean = tok->kind == TOKEN_TRUE;
 		return out;
 	}
 
