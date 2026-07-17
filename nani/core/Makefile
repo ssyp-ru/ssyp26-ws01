@@ -1,21 +1,23 @@
 CC := gcc
 CFLAGS := -ggdb -O0
 LFLAGS := -ggdb
+HEADERS := common.h lexer.h value.h parser.h codegen.h
+OBJECTS := main.o lexer.o parser.o
 
-all: calc
+all: nani
 
 clean:
 	rm -f calc *.o
+	rm nani
 
-calc: main.o lexer.o parser.o
-	$(CC) $(LFLAGS) -o $@ $^
+nani: main.o lexer.o parser.o
+	$(CC) $(LFLAGS) -o nani $(OBJECTS)
 
-main.o: main.c lexer.h parser.h value.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+main.o: main.c $(HEADERS)
+	$(CC) $(CFLAGS) -c main.c
 
-lexer.o: lexer.c lexer.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+lexer.o: lexer.c $(HEADERS)
+	$(CC) $(CFLAGS) -c lexer.c
 
-parser.o: parser.c parser.h lexer.h value.h
-	$(CC) $(CFLAGS) -c -o $@ $<
-
+parser.o: parser.c $(HEADERS)
+	$(CC) $(CFLAGS) -c parser.c
