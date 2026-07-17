@@ -15,7 +15,7 @@ static bool is_alnum(char c) {
 	return is_digit(c) || is_alpha(c);
 }
 
-static void add_token(tokens_t* tokens, const char* start, int len, int line, token_kind_t type) {
+static void add_token(tokens_t* tokens, const char* start, int len, token_kind_t type, int line) {
 	if (!tokens->ptr) {
 		tokens->length = 0;
 		tokens->capacity = 16;
@@ -86,9 +86,20 @@ bool tokenize(tokens_t* tokens, const char* code) {
     int line = 1;
 
 	while (code[i]) {
-		char c = code[i];
+		bool parsed = false;
+		for (int pi = 0; pi < sizeof(patterns) / sizeof(pattern_t); pi++) {
+			pattern_t* pat = &patterns[pi];
+
+			if (!memcmp(pat->pattern, &code[i], pat->len)) {
+				add_token(tokens, &code[i], pat->len, pat->type, line);
+				i += pat->len;
+				parsed = true;
+				break;
+			}
+		}
 
 		// special cases
+		char c = code[i];
 		if (is_digit(c)) { // number
 			int len = 0;
 			bool seen_point = false;
@@ -139,24 +150,10 @@ bool tokenize(tokens_t* tokens, const char* code) {
             continue;
         }
 
+        if (parsed) continue;
 
-		int parsed = 0;
-		for (int pi = 0; pi < sizeof(patterns) / sizeof(pattern_t); pi++) {
-			pattern_t* pat = &patterns[pi];
-
-			if (!memcmp(pat->pattern, &code[i], pat->len)) {
-				add_token(tokens, &code[i], pat->len, pat->type, line);
-				i += pat->len;
-				parsed = 1;
-				break;
-			}
-		}
-
-		if (!parsed) {
-			log_error("Invalid char on line %d: '%c'\n", line, c);
-			return false;
-		}
-
+        log_error("Invalid char on line %d: '%c'\n", line, c);
+        return false;
 	}
 
 	return true;
