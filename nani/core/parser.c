@@ -4,51 +4,51 @@
 #include "lexer.h"
 #include "value.h"
 
-[[noreturn]] static void err(Tokens* tokens, int* pos, const char* text) {
-	Token* tok = &tokens->ptr[*pos];
+[[noreturn]] static void err(tokens_t* tokens, int* pos, const char* text) {
+	token_t* tok = &tokens->ptr[*pos];
 
 	printf("Parser error at token %d: %s\n", *pos, text);
 	exit(1);
 }
 
-static Stmt* add_stmt(Program* ast) {
+static stmt_t* add_stmt(program_t* ast) {
 	if (!ast->ptr) {
 		ast->length = 0;
 		ast->capacity = 16;
-		ast->ptr = malloc(ast->capacity * sizeof(Stmt));
+		ast->ptr = malloc(ast->capacity * sizeof(stmt_t));
 	}
 
 	if (ast->length == ast->capacity) {
 		ast->capacity *= 2;
-		ast->ptr = realloc(ast->ptr, ast->capacity * sizeof(Stmt));
+		ast->ptr = realloc(ast->ptr, ast->capacity * sizeof(stmt_t));
 	}
 
 	return &ast->ptr[ast->length++];
 }
 
-void free_ast(Program* ast) {
+void free_ast(program_t* ast) {
 	// TODO
 }
 
-static void parse_stmt(Stmt* stmt, Tokens* tokens, int* pos);
-static Expr* parse_or(Tokens* tokens, int* pos);
-static Expr* parse_and(Tokens* tokens, int* pos);
-static Expr* parse_equality(Tokens* tokens, int* pos);
-static Expr* parse_comparison(Tokens* tokens, int* pos);
-static Expr* parse_term(Tokens* tokens, int* pos);
-static Expr* parse_factor(Tokens* tokens, int* pos);
-static Expr* parse_unary(Tokens* tokens, int* pos);
-static Expr* parse_primary(Tokens* tokens, int* pos);
+static void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);
+static expr_t* parse_or(tokens_t* tokens, int* pos);
+static expr_t* parse_and(tokens_t* tokens, int* pos);
+static expr_t* parse_equality(tokens_t* tokens, int* pos);
+static expr_t* parse_comparison(tokens_t* tokens, int* pos);
+static expr_t* parse_term(tokens_t* tokens, int* pos);
+static expr_t* parse_factor(tokens_t* tokens, int* pos);
+static expr_t* parse_unary(tokens_t* tokens, int* pos);
+static expr_t* parse_primary(tokens_t* tokens, int* pos);
 
-void parse_program(Program* ast, Tokens* tokens) {
+void parse_program(program_t* ast, tokens_t* tokens) {
 	int pos = 0;
 
-	Stmt* stmt = add_stmt(ast);
+	stmt_t* stmt = add_stmt(ast);
 	parse_stmt(stmt, tokens, &pos);
 }
 
-void parse_stmt(Stmt* stmt, Tokens* tokens, int* pos) {
-	Token* tok = &tokens->ptr[*pos];
+void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
+	token_t* tok = &tokens->ptr[*pos];
 	(*pos)++;
 
 	if (tok->kind == ASSERT) stmt->kind = STMT_ASSERT;
@@ -62,16 +62,16 @@ void parse_stmt(Stmt* stmt, Tokens* tokens, int* pos) {
 	if (tok->kind != SEMICOLON) err(tokens, pos, "Expected semicolon");
 }
 
-Expr* parse_or(Tokens* tokens, int* pos) {
-	Expr* left = parse_and(tokens, pos);
+expr_t* parse_or(tokens_t* tokens, int* pos) {
+	expr_t* left = parse_and(tokens, pos);
 
-	Token* tok = &tokens->ptr[*pos];
+	token_t* tok = &tokens->ptr[*pos];
 	if (tok->kind != OR) return left;
 	(*pos)++;
 
-	Expr* right = parse_and(tokens, pos);
+	expr_t* right = parse_and(tokens, pos);
 
-	Expr* out = malloc(sizeof(Expr));
+	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_BINARY;
 	out->binary.op = OR;
 	out->binary.l = left;
@@ -79,16 +79,16 @@ Expr* parse_or(Tokens* tokens, int* pos) {
 	return out;
 }
 
-Expr* parse_and(Tokens* tokens, int* pos) {
-	Expr* left = parse_equality(tokens, pos);
+expr_t* parse_and(tokens_t* tokens, int* pos) {
+	expr_t* left = parse_equality(tokens, pos);
 
-	Token* tok = &tokens->ptr[*pos];
+	token_t* tok = &tokens->ptr[*pos];
 	if (tok->kind != AND) return left;
 	(*pos)++;
 
-	Expr* right = parse_equality(tokens, pos);
+	expr_t* right = parse_equality(tokens, pos);
 
-	Expr* out = malloc(sizeof(Expr));
+	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_BINARY;
 	out->binary.op = AND;
 	out->binary.l = left;
@@ -96,16 +96,16 @@ Expr* parse_and(Tokens* tokens, int* pos) {
 	return out;
 }
 
-Expr* parse_equality(Tokens* tokens, int* pos) {
-	Expr* left = parse_comparison(tokens, pos);
+expr_t* parse_equality(tokens_t* tokens, int* pos) {
+	expr_t* left = parse_comparison(tokens, pos);
 
-	Token* tok = &tokens->ptr[*pos];
+	token_t* tok = &tokens->ptr[*pos];
 	if (tok->kind != EQU && tok->kind != NEQ) return left;
 	(*pos)++;
 
-	Expr* right = parse_comparison(tokens, pos);
+	expr_t* right = parse_comparison(tokens, pos);
 
-	Expr* out = malloc(sizeof(Expr));
+	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_BINARY;
 	out->binary.op = tok->kind;
 	out->binary.l = left;
@@ -113,16 +113,16 @@ Expr* parse_equality(Tokens* tokens, int* pos) {
 	return out;
 }
 
-Expr* parse_comparison(Tokens* tokens, int* pos) {
-	Expr* left = parse_term(tokens, pos);
+expr_t* parse_comparison(tokens_t* tokens, int* pos) {
+	expr_t* left = parse_term(tokens, pos);
 
-	Token* tok = &tokens->ptr[*pos];
+	token_t* tok = &tokens->ptr[*pos];
 	if (tok->kind != LESS && tok->kind != LESS_EQ && tok->kind != GREATER && tok->kind != GREATER_EQ) return left;
 	(*pos)++;
 
-	Expr* right = parse_term(tokens, pos);
+	expr_t* right = parse_term(tokens, pos);
 
-	Expr* out = malloc(sizeof(Expr));
+	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_BINARY;
 	out->binary.op = tok->kind;
 	out->binary.l = left;
@@ -130,16 +130,16 @@ Expr* parse_comparison(Tokens* tokens, int* pos) {
 	return out;
 }
 
-Expr* parse_term(Tokens* tokens, int* pos) {
-	Expr* left = parse_factor(tokens, pos);
+expr_t* parse_term(tokens_t* tokens, int* pos) {
+	expr_t* left = parse_factor(tokens, pos);
 
-	Token* tok = &tokens->ptr[*pos];
+	token_t* tok = &tokens->ptr[*pos];
 	if (tok->kind != ADD && tok->kind != MINUS) return left;
 	(*pos)++;
 
-	Expr* right = parse_factor(tokens, pos);
+	expr_t* right = parse_factor(tokens, pos);
 
-	Expr* out = malloc(sizeof(Expr));
+	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_BINARY;
 	out->binary.op = tok->kind;
 	out->binary.l = left;
@@ -147,16 +147,16 @@ Expr* parse_term(Tokens* tokens, int* pos) {
 	return out;
 }
 
-Expr* parse_factor(Tokens* tokens, int* pos) {
-	Expr* left = parse_unary(tokens, pos);
+expr_t* parse_factor(tokens_t* tokens, int* pos) {
+	expr_t* left = parse_unary(tokens, pos);
 
-	Token* tok = &tokens->ptr[*pos];
+	token_t* tok = &tokens->ptr[*pos];
 	if (tok->kind != MUL && tok->kind != DIV) return left;
 	(*pos)++;
 
-	Expr* right = parse_unary(tokens, pos);
+	expr_t* right = parse_unary(tokens, pos);
 
-	Expr* out = malloc(sizeof(Expr));
+	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_BINARY;
 	out->binary.op = tok->kind;
 	out->binary.l = left;
@@ -164,33 +164,33 @@ Expr* parse_factor(Tokens* tokens, int* pos) {
 	return out;
 }
 
-Expr* parse_unary(Tokens* tokens, int* pos) {
-	Token* tok = &tokens->ptr[*pos];
+expr_t* parse_unary(tokens_t* tokens, int* pos) {
+	token_t* tok = &tokens->ptr[*pos];
 	if (tok->kind != BANG && tok->kind != MINUS) return parse_primary(tokens, pos);
 	(*pos)++;
 
-	Expr* out = malloc(sizeof(Expr));
+	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_UNARY;
 	out->unary.op = tok->kind;
 	out->unary.operand = parse_unary(tokens, pos);
 	return out;
 }
 
-Expr* parse_primary(Tokens* tokens, int* pos) {
-	Token* tok = &tokens->ptr[*pos];
+expr_t* parse_primary(tokens_t* tokens, int* pos) {
+	token_t* tok = &tokens->ptr[*pos];
 	(*pos)++;
 
 	if (tok->kind == PAR_OPEN) {
-		Expr* expr = parse_or(tokens, pos);
+		expr_t* expr = parse_or(tokens, pos);
 
-		Token* tok2 = &tokens->ptr[*pos];
+		token_t* tok2 = &tokens->ptr[*pos];
 		(*pos)++;
 		if (tok2->kind != PAR_CLOSE) err(tokens, pos, "Expected right parentheses");
 
 		return expr;
 	}
 
-	Expr* out = malloc(sizeof(Expr));
+	expr_t* out = malloc(sizeof(expr_t));
 	out->kind = EXPR_LITERAL;
 
 	if (tok->kind == NUMBER) {

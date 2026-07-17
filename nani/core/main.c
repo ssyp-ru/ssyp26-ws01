@@ -22,13 +22,13 @@ static char* read_full(FILE* fp) {
 	exit(1);
 }
 
-static Value eval(Expr* expr) {
+static value_t eval(expr_t* expr) {
 	if (expr->kind == EXPR_LITERAL) {
 		return expr->literal.val;
 	}
 
 	if (expr->kind == EXPR_UNARY) {
-		Value inner = eval(expr->unary.operand);
+		value_t inner = eval(expr->unary.operand);
 
 		if (expr->unary.op == MINUS) {
 			if (inner.kind != VAL_NUM) rterr("Expected number after unary minus");
@@ -50,7 +50,7 @@ static Value eval(Expr* expr) {
 	}
 }
 
-static const char* token_name(TokenKind kind) {
+static const char* token_name(token_kind_t kind) {
 #define A(k) if (kind == k) return #k;
 	A(NUMBER)
 	A(SEMICOLON)
@@ -80,7 +80,7 @@ static const char* token_name(TokenKind kind) {
 #undef A
 }
 
-static void print_expr(Expr* expr) {
+static void print_expr(expr_t* expr) {
 	if (expr->kind == EXPR_LITERAL) {
 		if (expr->literal.val.kind == VAL_NUM) printf("literal(%lf)", expr->literal.val.num);
 		else printf("literal(%s)", expr->literal.val.boolean ? "true" : "false");
@@ -113,10 +113,10 @@ int main(int argc, char** argv) {
 	char* code = read_full(fp);
 	fclose(fp);
 
-	Tokens tokens = { 0 };
+	tokens_t tokens = { 0 };
 	if (!tokenize(&tokens, code)) return 1;
 
-	Program ast = { 0 };
+	program_t ast = { 0 };
 	parse_program(&ast, &tokens);
 	free(code);
 
