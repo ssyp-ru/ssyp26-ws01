@@ -126,7 +126,15 @@ expr_t* parse_comparison(tokens_t* tokens, int* pos) {
 	expr_t* left = parse_term(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
-	if (tok->type != TOKEN_LESS && tok->type != TOKEN_LESS_EQ && tok->type != TOKEN_GREATER && tok->type != TOKEN_GREATER_EQ) return left;
+    switch (tok->type) {
+        case TOKEN_LESS:
+        case TOKEN_LESS_EQ:
+        case TOKEN_GREATER:
+        case TOKEN_GREATER_EQ:
+            return left;
+        default:
+            break;
+    }
 	(*pos)++;
 
 	expr_t* right = parse_term(tokens, pos);
