@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "parser.h"
 #include "lexer.h"
+#include "c_utils/utils.h"
 
 [[noreturn]] static void err(tokens_t* tokens, int* pos, const char* text) {
 	token_t* tok = &tokens->ptr[*pos];
@@ -60,6 +61,7 @@ static expr_t* parse_unary(tokens_t* tokens, int* pos);
 static expr_t* parse_primary(tokens_t* tokens, int* pos);
 
 void parse_program(stmt_list_t* ast, tokens_t* tokens) {
+	log_debug("parse_program");
 	int pos = 0;
 
     // TODO: continue parsing statements until eof
@@ -68,6 +70,7 @@ void parse_program(stmt_list_t* ast, tokens_t* tokens) {
 }
 
 void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
+	log_debug("parse_stmt");
 	token_t* tok = &tokens->ptr[*pos];
 	(*pos)++;
 
@@ -84,6 +87,7 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_or(tokens_t* tokens, int* pos) {
+	log_debug("parse_or");
 	expr_t* left = parse_and(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
@@ -95,6 +99,7 @@ expr_t* parse_or(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_and(tokens_t* tokens, int* pos) {
+	log_debug("parse_and");
 	expr_t* left = parse_equality(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
@@ -106,6 +111,7 @@ expr_t* parse_and(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_equality(tokens_t* tokens, int* pos) {
+	log_debug("parse_equality");
 	expr_t* left = parse_comparison(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
@@ -117,6 +123,7 @@ expr_t* parse_equality(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_comparison(tokens_t* tokens, int* pos) {
+	log_debug("parse_comparison");
 	expr_t* left = parse_term(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
@@ -128,6 +135,7 @@ expr_t* parse_comparison(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_term(tokens_t* tokens, int* pos) {
+	log_debug("parse_term");
 	expr_t* left = parse_factor(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
@@ -139,6 +147,7 @@ expr_t* parse_term(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_factor(tokens_t* tokens, int* pos) {
+	log_debug("parse_factor");
 	expr_t* left = parse_unary(tokens, pos);
 
 	token_t* tok = &tokens->ptr[*pos];
@@ -150,6 +159,7 @@ expr_t* parse_factor(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_unary(tokens_t* tokens, int* pos) {
+	log_debug("parse_unary");
 	token_t* tok = &tokens->ptr[*pos];
 	if (tok->type != TOKEN_BANG && tok->type != TOKEN_MINUS) return parse_primary(tokens, pos);
 	(*pos)++;
@@ -162,6 +172,7 @@ expr_t* parse_unary(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_primary(tokens_t* tokens, int* pos) {
+	log_debug("parse_primary");
 	token_t* tok = &tokens->ptr[*pos];
 	(*pos)++;
 
