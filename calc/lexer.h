@@ -48,21 +48,20 @@ typedef struct {
 } token_list_t;
 
 
-
 typedef struct token_array {
 	token_t *data;
 	int size;
 	int capacity;
 } token_array_t;  
 
-void init_slice(token_array_t *a);
+void token_array_init(token_array_t *a);
+void token_array_destroy(token_array_t *a);
+void token_array_push_back(token_array_t *a, token_t value);
+token_t token_array_pop_back(token_array_t *a);
 
-void destroy_slice(token_array_t *a);
-
-void push_back(token_array_t *a, token_t value);
-
-token_t pop_back(token_array_t *a);
-
-token_array_t tokenizer(const char *source);
+token_type getTokenType(char sym);
+void tokenize(char *text, token_array_t *a);
+void output(char *text, token_array_t *t);
+void token_output(token_array_t *t);
 
 #endif

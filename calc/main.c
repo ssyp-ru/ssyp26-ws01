@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lexer.h"
-#include "token.h"
 #include "parser.h"
 // token
 
@@ -19,7 +18,7 @@ int main() {
 	s[size] = '\0';
 
 	token_array_t t;
-	init_slice(&t);
+	token_array_init(&t);
 	tokenize(s, &t);
 	//token_output(&t);
 	output(s, &t);
@@ -32,7 +31,7 @@ int main() {
     expr_t *expr = p_expr(&lexer);
     print_ast(expr);
 
-	destroy_slice(&t);
+	token_array_destroy(&t);
 	fclose(f);
 	free(s);
 	
