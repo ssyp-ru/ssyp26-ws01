@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "value.h"
+#include "c_utils/utils.h"
 
 static char* read_full(FILE* fp) {
 	fseek(fp, 0, SEEK_END);
@@ -106,6 +107,8 @@ static void print_expr(expr_t* expr) {
 */
 
 int main(int argc, char** argv) {
+	log_set_level(LOG_LEVEL_DEBUG);
+
 	if (argc != 2) {
 		printf("Usage: %s <filename>\n", argv[0]);
 		return 1;

@@ -149,7 +149,7 @@ bool tokenize(tokens_t* tokens, const char* code) {
 			}
 		}
 
-		printf("Invalid char on line %d: '%c'\n", line, c);
+		log_error("Invalid char on line %d: '%c'\n", line, c);
 		return false;
 
 loop_end: // im sorry
