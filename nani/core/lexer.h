@@ -45,6 +45,8 @@ typedef enum {
     TOKEN_THIS,
     TOKEN_TRUE,
     TOKEN_WHILE,
+
+    TOKEN_EOF,
 } token_kind_t;
 
 typedef struct {
