@@ -15,10 +15,10 @@ typedef enum {
 typedef struct {
     value_type_t type;
     union {
-        bool boolean;
+        int boolean;
         double number;
         obj_t *object;
-    } kind;
+    } val;
 } value_t;
 
 

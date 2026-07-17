@@ -3,15 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-static bool is_digit(c) {
+static bool is_digit(char c) {
 	return c >= '0' && c <= '9';
 }
 
-static bool is_alpha(c) {
-	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+static bool is_alpha(char c) {
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-static bool is_alnum(c) {
+static bool is_alnum(char c) {
 	return is_digit(c) || is_alpha(c);
 }
 
@@ -157,4 +157,3 @@ loop_end: // im sorry
 
 	return true;
 }
-

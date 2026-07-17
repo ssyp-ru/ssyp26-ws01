@@ -22,22 +22,23 @@ static char* read_full(FILE* fp) {
 	exit(1);
 }
 
+/*
 static value_t eval(expr_t* expr) {
-	if (expr->kind == EXPR_LITERAL) {
-		return expr->literal.val;
+	if (expr->type == EXPR_LITERAL) {
+		return expr->value.literal;
 	}
 
-	if (expr->kind == EXPR_UNARY) {
+	if (expr->type == EXPR_UNARY) {
 		value_t inner = eval(expr->unary.operand);
 
-		if (expr->unary.op == TOKEN_MINUS) {
-			if (inner.kind != VAL_NUM) rterr("Expected number after unary minus");
+		if (expr->value.unary.op.type == TOKEN_MINUS) {
+			if (inner.type != VAL_NUMBER) rterr("Expected number after unary minus");
 
-			inner.num = -inner.num;
+			inner.val.number = -inner.val.number;
 		} else if (expr->unary.op == TOKEN_BANG) {
-			if (inner.kind != VAL_BOOL) rterr("Expected bool after unary bang");
+			if (inner.type != VAL_BOOL) rterr("Expected bool after unary bang");
 
-			inner.boolean = !inner.boolean;
+			inner.val.boolean = !inner.val.boolean;
 		} else assert(false);
 
 		return inner;
@@ -49,6 +50,7 @@ static value_t eval(expr_t* expr) {
 			assert(false);
 	}
 }
+*/
 
 static const char* token_name(token_kind_t kind) {
 #define A(k) if (kind == k) return #k;
@@ -78,10 +80,11 @@ static const char* token_name(token_kind_t kind) {
 #undef A
 }
 
+/*
 static void print_expr(expr_t* expr) {
 	if (expr->kind == EXPR_LITERAL) {
-		if (expr->literal.val.kind == VAL_NUM) printf("literal(%lf)", expr->literal.val.num);
-		else printf("literal(%s)", expr->literal.val.boolean ? "true" : "false");
+		if (expr->literal.val.type == VAL_NUMBER) printf("literal(%lf)", expr->literal.val.val.number);
+		else printf("literal(%s)", expr->literal.val.val.boolean ? "true" : "false");
 
 		return;
 	}
@@ -100,6 +103,7 @@ static void print_expr(expr_t* expr) {
 	print_expr(expr->binary.r);
 	printf(")");
 }
+*/
 
 int main(int argc, char** argv) {
 	if (argc != 2) {
@@ -114,12 +118,11 @@ int main(int argc, char** argv) {
 	tokens_t tokens = { 0 };
 	if (!tokenize(&tokens, code)) return 1;
 
-	program_t ast = { 0 };
+	stmt_list_t ast;
 	parse_program(&ast, &tokens);
 	free(code);
 
-	print_expr(ast.ptr[0].expr);
+	//print_expr(ast.ptr[0].expr);
 
 	return 0;
 }
-
