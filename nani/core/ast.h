@@ -30,7 +30,7 @@ typedef enum {
     LITERAL_BOOL,
     LITERAL_NUMBER,
     LITERAL_STRING
-} LiteralType;
+} literal_type_t;
 
 typedef enum {
     EXPR_LITERAL,
@@ -43,17 +43,17 @@ typedef enum {
     EXPR_CALL,
     EXPR_GET,
     EXPR_SET
-} ExprType;
+} expr_type_t;
 
 struct expr_t {
-    ExprType type;
+    expr_type_t type;
     int line;
     /* -1 means global. The resolver fills this for local name expressions. */
     int resolved_depth;
 
     union {
         struct {
-            LiteralType type;
+            literal_type_t type;
             token_t lexeme;
         } literal;
         struct {
@@ -117,10 +117,10 @@ typedef enum {
     STMT_RETURN,
     STMT_STRUCT,
     STMT_WHILE
-} StmtType;
+} stmt_type_t;
 
 struct stmt_t {
-    StmtType type;
+    stmt_type_t type;
     int line;
 
     union {

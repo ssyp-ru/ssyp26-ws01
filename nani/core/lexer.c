@@ -15,7 +15,7 @@ static bool is_alnum(c) {
 	return is_digit(c) || is_alpha(c);
 }
 
-static void add_token(tokens_t* tokens, const char* start, int len, int line, TokenType type) {
+static void add_token(tokens_t* tokens, const char* start, int len, int line, token_type_t type) {
 	if (!tokens->ptr) {
 		tokens->length = 0;
 		tokens->capacity = 16;
@@ -36,13 +36,13 @@ static void add_token(tokens_t* tokens, const char* start, int len, int line, To
 
 typedef struct {
 	const char* pattern;
-	TokenType type;
+	token_type_t type;
 	int len;
-} Pattern;
+} pattern_t;
 
 // longer patterns should go first
 #define P(pat, kin) { .pattern = (pat), .type = (kin), .len = sizeof(pat) - 1 }
-static Pattern patterns[] = {
+static pattern_t patterns[] = {
     P("return", TOKEN_RETURN),
     P("struct", TOKEN_STRUCT),
     P("assert", TOKEN_ASSERT),
@@ -139,8 +139,8 @@ bool tokenize(tokens_t* tokens, const char* code) {
             continue;
         }
 
-		for (int pi = 0; pi < sizeof(patterns) / sizeof(Pattern); pi++) {
-			Pattern* pat = &patterns[pi];
+		for (int pi = 0; pi < sizeof(patterns) / sizeof(pattern_t); pi++) {
+			pattern_t* pat = &patterns[pi];
 
 			if (!memcmp(pat->pattern, &code[i], pat->len)) {
 				add_token(tokens, &code[i], pat->len, pat->type, line);
