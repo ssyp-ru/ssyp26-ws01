@@ -35,6 +35,6 @@ typedef enum {
     OP_STRUCT,
     OP_METHOD,
     OP_RETURN
-} OpCode;
+} op_code_t;
 
 #endif
