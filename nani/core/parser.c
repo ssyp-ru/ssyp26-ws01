@@ -5,7 +5,16 @@
 #include "c_utils/utils.h"
 
 static token_t* get_tok(tokens_t* tokens, int* pos) {
-    if (*pos >= tokens->length) return NULL;
+    if (*pos >= tokens->length) {
+        // hack, but simpler than checking for NULL everywhere
+        static token_t eof = {
+            .type = TOKEN_EOF,
+            .start = "[EOF]",
+            .length = 5,
+            .line = -1,
+        };
+        return &eof;
+    };
 
     return &tokens->ptr[*pos];
 }
@@ -17,7 +26,6 @@ static void err(tokens_t* tokens, int* pos, const char* text) {
     (*pos)--;
 
     token_t* tok = get_tok(tokens, pos);
-    // TODO: tok may be NULL
 
     char* tokstr = (char*) malloc((tok->length + 1) * sizeof(char));
     memcpy(tokstr, tok->start, tok->length);
