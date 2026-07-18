@@ -109,6 +109,20 @@ static value_t eval(expr_t* expr) {
     rterr("TODO: other expr types");
 }
 
+static void interpret(stmt_t* stmt) {
+    switch (stmt->type) {
+    case STMT_ASSERT:
+        {
+            value_t val = eval(stmt->as.assert_stmt.expression);
+            if (val.type != VAL_BOOL) rterr("assert statement with non-bool value");
+            if (!val.val.boolean) rterr("assertion failed");
+            break;
+        }
+    default:
+        assert(false);
+    }
+}
+
 int main(int argc, char** argv) {
     log_set_level(LOG_LEVEL_DEBUG);
 
@@ -129,8 +143,7 @@ int main(int argc, char** argv) {
     stmt_list_t ast = { 0 };
     parse_program(&ast, &tokens);
 
-    value_t val = eval(ast.items[0]->as.assert_stmt.expression);
-    printf("%d", val.val.boolean);
+    interpret(ast.items[0]);
 
     return 0;
 }
