@@ -59,6 +59,7 @@ static expr_t* make_logical_expr(expr_t* left, token_t op, expr_t* right) {
     log_token(" exrp token:", &op);
     expr_t* out = (expr_t*) malloc(sizeof(expr_t));
     out->type = EXPR_LOGICAL;
+    out->line = op.line;
     out->value.logical.op = op;
     out->value.logical.left = left;
     out->value.logical.right = right;
@@ -70,6 +71,7 @@ static expr_t* make_binary_expr(expr_t* left, token_t op, expr_t* right) {
     log_token("  bin exrp token:", &op);
     expr_t* out = (expr_t*) malloc(sizeof(expr_t));
     out->type = EXPR_BINARY;
+    out->line = op.line;
     out->value.binary.op = op;
     out->value.binary.left = left;
     out->value.binary.right = right;
@@ -106,6 +108,8 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
     log_token("  cur token", get_tok(tokens, pos));
     token_t* tok = get_tok(tokens, pos);
     (*pos)++;
+
+    stmt->line = tok->line;
 
     if (tok->type == TOKEN_ASSERT) stmt->type = STMT_ASSERT;
     else if (tok->type == TOKEN_PRINT) stmt->type = STMT_PRINT;
@@ -214,6 +218,7 @@ expr_t* parse_unary(tokens_t* tokens, int* pos) {
 
     expr_t* out = (expr_t*) malloc(sizeof(expr_t));
     out->type = EXPR_UNARY;
+    out->line = tok->line;
     out->value.unary.op = *tok;
     out->value.unary.right = parse_unary(tokens, pos);
     return out;
@@ -236,6 +241,7 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
     }
 
     expr_t* out = (expr_t*) malloc(sizeof(expr_t));
+    out->line = tok->line;
     out->type = EXPR_LITERAL;
     out->value.literal.lexeme = *tok;
 

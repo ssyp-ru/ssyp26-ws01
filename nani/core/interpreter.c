@@ -5,8 +5,8 @@
 #include "lexer.h"
 #include "c_utils/utils.h"
 
-[[noreturn]] static void rterr(const char* text) {
-    log_error("Runtime error: %s\n", text);
+[[noreturn]] static void rterr(int line, const char* text) {
+    log_error("Runtime error on line %d: %s\n", line, text);
     exit(1);
 }
 
@@ -28,7 +28,7 @@ static value_t eval(expr_t* expr) {
             val.type = VAL_BOOL;
             val.val.boolean = expr->value.literal.lexeme.type == TOKEN_TRUE;
         default:
-            rterr("TODO: literals");
+            rterr(expr->line, "TODO: literals");
         }
 
         return val;
@@ -38,11 +38,11 @@ static value_t eval(expr_t* expr) {
         value_t inner = eval(expr->value.unary.right);
 
         if (expr->value.unary.op.type == TOKEN_MINUS) {
-            if (inner.type != VAL_NUMBER) rterr("Expected number after unary minus");
+            if (inner.type != VAL_NUMBER) rterr(expr->line, "Expected number after unary minus");
 
             inner.val.number = -inner.val.number;
         } else if (expr->value.unary.op.type == TOKEN_BANG) {
-            if (inner.type != VAL_BOOL) rterr("Expected bool after unary bang");
+            if (inner.type != VAL_BOOL) rterr(expr->line, "Expected bool after unary bang");
 
             inner.val.boolean = !inner.val.boolean;
         } else assert(false);
@@ -94,22 +94,22 @@ static value_t eval(expr_t* expr) {
             break;
 
         case TOKEN_LESS:
-            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr("comparision with non-numbers");
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr(expr->line, "comparision with non-numbers");
             val.val.boolean = left.val.number < right.val.number;
             break;
 
         case TOKEN_LESS_EQ:
-            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr("comparision with non-numbers");
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr(expr->line, "comparision with non-numbers");
             val.val.boolean = left.val.number <= right.val.number;
             break;
 
         case TOKEN_GREATER:
-            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr("comparision with non-numbers");
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr(expr->line, "comparision with non-numbers");
             val.val.boolean = left.val.number > right.val.number;
             break;
 
         case TOKEN_GREATER_EQ:
-            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr("comparision with non-numbers");
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr(expr->line, "comparision with non-numbers");
             val.val.boolean = left.val.number >= right.val.number;
             break;
 
@@ -120,7 +120,7 @@ static value_t eval(expr_t* expr) {
         return val;
     }
 
-    rterr("TODO: other expr types");
+    rterr(expr->line, "TODO: other expr types");
 }
 
 void interpret(stmt_t* stmt) {
@@ -128,8 +128,8 @@ void interpret(stmt_t* stmt) {
     case STMT_ASSERT:
         {
             value_t val = eval(stmt->as.assert_stmt.expression);
-            if (val.type != VAL_BOOL) rterr("assert statement with non-bool value");
-            if (!val.val.boolean) rterr("assertion failed");
+            if (val.type != VAL_BOOL) rterr(stmt->line, "assert statement with non-bool value");
+            if (!val.val.boolean) rterr(stmt->line, "assertion failed");
             break;
         }
     default:
