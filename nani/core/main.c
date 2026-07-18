@@ -84,7 +84,6 @@ static value_t eval(expr_t* expr) {
             assert(false);
         }
 
-
         value_t val;
         val.type = VAL_NUMBER;
         val.val.number = left;
@@ -97,10 +96,38 @@ static value_t eval(expr_t* expr) {
 
         value_t val;
         val.type = VAL_BOOL;
-        val.val.boolean = val_equal(&left, &right);
 
-        if (expr->value.logical.op.type == TOKEN_BANG_EQ) {
-            val.val.boolean = !val.val.boolean;
+        switch (expr->value.logical.op.type) {
+        case TOKEN_EQ_EQ:
+            val.val.boolean = val_equal(&left, &right);
+            break;
+
+        case TOKEN_BANG_EQ:
+            val.val.boolean = !val_equal(&left, &right);
+            break;
+
+        case TOKEN_LESS:
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr("comparision with non-numbers");
+            val.val.boolean = left.val.number < right.val.number;
+            break;
+
+        case TOKEN_LESS_EQ:
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr("comparision with non-numbers");
+            val.val.boolean = left.val.number <= right.val.number;
+            break;
+
+        case TOKEN_GREATER:
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr("comparision with non-numbers");
+            val.val.boolean = left.val.number > right.val.number;
+            break;
+
+        case TOKEN_GREATER_EQ:
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr("comparision with non-numbers");
+            val.val.boolean = left.val.number >= right.val.number;
+            break;
+
+        default:
+            assert(false);
         }
 
         return val;
