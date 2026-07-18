@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "lexer.h"
 #include "parser.h"
+#include "interpreter.h"
 // token
 
 
@@ -30,7 +31,7 @@ int main() {
 
     expr_t *expr = p_expr(&lexer);
     print_ast(expr);
-
+    printf("Result: %lf \n", evaluate(expr).val.number);
 	token_array_destroy(&t);
 	fclose(f);
 	free(s);

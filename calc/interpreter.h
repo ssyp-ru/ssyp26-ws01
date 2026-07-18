@@ -3,6 +3,6 @@
 
 #include "parser.h"
 
-int interpret(const stmt_list_t *statements);
+value_t evaluate(expr_t * ex);
 
 #endif

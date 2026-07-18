@@ -26,8 +26,8 @@ expr_t * p_term(lexer_t *lexer) {
     expr_t * l = p_factor(lexer);
 
     token_t t = peek_token(lexer);
-    if (t.t == TOKEN_PLUS) {
-        get_token(lexer); // get PLUS
+    if (t.t == TOKEN_PLUS || t.t == TOKEN_MINUS) {
+        get_token(lexer); // get PLUS or MINUS
         expr_t * r = p_factor(lexer);
         expr_t * res = make_binary_expr(t.t, l, r);
         return res;
