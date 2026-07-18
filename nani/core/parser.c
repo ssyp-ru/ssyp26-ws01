@@ -55,6 +55,8 @@ static stmt_t* add_stmt(stmt_list_t* ast) {
 }
 
 static expr_t* make_logical_expr(expr_t* left, token_t op, expr_t* right) {
+    log_debug("create logical expr");
+    log_token(" exrp token:", &op);
     expr_t* out = (expr_t*) malloc(sizeof(expr_t));
     out->type = EXPR_LOGICAL;
     out->value.logical.op = op;
@@ -64,6 +66,8 @@ static expr_t* make_logical_expr(expr_t* left, token_t op, expr_t* right) {
 }
 
 static expr_t* make_binary_expr(expr_t* left, token_t op, expr_t* right) {
+    log_debug("create binary expr");
+    log_token("  bin exrp token:", &op);
     expr_t* out = (expr_t*) malloc(sizeof(expr_t));
     out->type = EXPR_BINARY;
     out->value.binary.op = op;
@@ -87,8 +91,9 @@ static expr_t* parse_unary(tokens_t* tokens, int* pos);
 static expr_t* parse_primary(tokens_t* tokens, int* pos);
 
 void parse_program(stmt_list_t* ast, tokens_t* tokens) {
-    log_debug("parse_program");
     int pos = 0;
+    log_debug("parse_program: pos=%d", pos);
+    log_token("  cur token", get_tok(tokens, &pos));
 
     // TODO: continue parsing statements until eof
     stmt_t* stmt = add_stmt(ast);
@@ -96,7 +101,8 @@ void parse_program(stmt_list_t* ast, tokens_t* tokens) {
 }
 
 void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
-    log_debug("parse_stmt");
+    log_debug("parse_stmt: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
     token_t* tok = get_tok(tokens, pos);
     (*pos)++;
 
@@ -113,7 +119,8 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_or(tokens_t* tokens, int* pos) {
-    log_debug("parse_or");
+    log_debug("parse_or: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
     expr_t* left = parse_and(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
@@ -125,7 +132,8 @@ expr_t* parse_or(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_and(tokens_t* tokens, int* pos) {
-    log_debug("parse_and");
+    log_debug("parse_and: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
     expr_t* left = parse_equality(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
@@ -137,7 +145,8 @@ expr_t* parse_and(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_equality(tokens_t* tokens, int* pos) {
-    log_debug("parse_equality");
+    log_debug("parse_equality: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
     expr_t* left = parse_comparison(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
@@ -149,7 +158,8 @@ expr_t* parse_equality(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_comparison(tokens_t* tokens, int* pos) {
-    log_debug("parse_comparison");
+    log_debug("parse_comparison: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
     expr_t* left = parse_term(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
@@ -169,7 +179,8 @@ expr_t* parse_comparison(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_term(tokens_t* tokens, int* pos) {
-    log_debug("parse_term");
+    log_debug("parse_term: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
     expr_t* left = parse_factor(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
@@ -181,7 +192,8 @@ expr_t* parse_term(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_factor(tokens_t* tokens, int* pos) {
-    log_debug("parse_factor");
+    log_debug("parse_factor: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
     expr_t* left = parse_unary(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
@@ -193,7 +205,8 @@ expr_t* parse_factor(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_unary(tokens_t* tokens, int* pos) {
-    log_debug("parse_unary");
+    log_debug("parse_unary: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
     token_t* tok = get_tok(tokens, pos);
     if (tok->type != TOKEN_BANG && tok->type != TOKEN_MINUS) return parse_primary(tokens, pos);
     (*pos)++;
@@ -206,7 +219,8 @@ expr_t* parse_unary(tokens_t* tokens, int* pos) {
 }
 
 expr_t* parse_primary(tokens_t* tokens, int* pos) {
-    log_debug("parse_primary");
+    log_debug("parse_primary: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
     token_t* tok = get_tok(tokens, pos);
     (*pos)++;
 
