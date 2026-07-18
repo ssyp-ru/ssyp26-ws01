@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     }
 
     FILE* fp = fopen(argv[1], "r");
-    char* code = read_full(fp);
+    const char* code = read_full(fp);
     fclose(fp);
 
     tokens_t tokens = { 0 };
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     parse_program(&ast, &tokens);
 
     for (int i = 0; i < ast.count; i++) {
-        interpret(ast.items[i]);
+        interpret(code, ast.items[i]);
     }
 
     return 0;
