@@ -150,7 +150,7 @@ expr_t* parse_equality(tokens_t* tokens, int* pos) {
     expr_t* left = parse_comparison(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
-    if (tok->type != TOKEN_EQ && tok->type != TOKEN_BANG_EQ) return left;
+    if (tok->type != TOKEN_EQ_EQ && tok->type != TOKEN_BANG_EQ) return left;
     (*pos)++;
 
     expr_t* right = parse_comparison(tokens, pos);
