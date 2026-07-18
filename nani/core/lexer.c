@@ -81,6 +81,63 @@ static pattern_t patterns[] = {
 };
 #undef P
 
+const char* token_kind_name(token_kind_t type) {
+    switch (type) {
+        case TOKEN_LEFT_PAREN: return "LEFT_PAREN";
+        case TOKEN_RIGHT_PAREN: return "RIGHT_PAREN";
+        case TOKEN_LEFT_BRACE: return "LEFT_BRACE";
+        case TOKEN_RIGHT_BRACE: return "RIGHT_BRACE";
+        case TOKEN_COMMA: return "COMMA";
+        case TOKEN_DOT: return "DOT";
+        case TOKEN_SEMICOLON: return "SEMICOLON";
+        case TOKEN_MINUS: return "MINUS";
+        case TOKEN_PLUS: return "PLUS";
+        case TOKEN_SLASH: return "SLASH";
+        case TOKEN_STAR: return "STAR";
+        case TOKEN_BANG: return "BANG";
+        case TOKEN_BANG_EQ: return "BANG_EQ";
+        case TOKEN_EQ: return "EQ";
+        case TOKEN_EQ_EQ: return "EQ_EQ";
+        case TOKEN_GREATER: return "GREATER";
+        case TOKEN_GREATER_EQ: return "GREATER_EQ";
+        case TOKEN_LESS: return "LESS";
+        case TOKEN_LESS_EQ: return "LESS_EQ";
+        case TOKEN_IDENTIFIER: return "IDENTIFIER";
+        case TOKEN_STRING: return "STRING";
+        case TOKEN_NUMBER: return "NUMBER";
+        case TOKEN_AND: return "AND";
+        case TOKEN_ASSERT: return "ASSERT";
+        case TOKEN_ELSE: return "ELSE";
+        case TOKEN_FALSE: return "FALSE";
+        case TOKEN_FN: return "FN";
+        case TOKEN_FOR: return "FOR";
+        case TOKEN_IF: return "IF";
+        case TOKEN_LET: return "LET";
+        case TOKEN_NIL: return "NIL";
+        case TOKEN_OR: return "OR";
+        case TOKEN_PRINT: return "PRINT";
+        case TOKEN_RETURN: return "RETURN";
+        case TOKEN_STRUCT: return "STRUCT";
+        case TOKEN_THIS: return "THIS";
+        case TOKEN_TRUE: return "TRUE";
+        case TOKEN_WHILE: return "WHILE";
+        case TOKEN_EOF: return "EOF";
+        default: return "UNKNOWN";
+    }
+}
+
+void log_token(const char* prefix, const token_t* token) {
+    log_debug("%s: type=%s, lexeme=\"%.*s\", line=%d",
+              prefix, token_kind_name(token->type), token->length, token->start, token->line);
+}
+
+void log_tokens(const tokens_t* tokens) {
+    log_debug("tokens: count=%d", tokens->length);
+    for (int i = 0; i < tokens->length; i++) {
+        log_token("token", &tokens->ptr[i]);
+    }
+}
+
 bool tokenize(tokens_t* tokens, const char* code) {
     int i = 0;
     int line = 1;
