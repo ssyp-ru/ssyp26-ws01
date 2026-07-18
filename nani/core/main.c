@@ -63,13 +63,35 @@ static value_t eval(expr_t* expr) {
         return inner;
     }
 
-    rterr("TODO: other expr types");
+    if (expr->type == EXPR_BINARY) {
+        double left = eval(expr->value.binary.left).val.number;
+        double right = eval(expr->value.binary.right).val.number;
 
-    /*switch (expr->binary.op) {
-    // TODO
-    default:
-        assert(false);
-    }*/
+        switch (expr->value.binary.op.type) {
+            case TOKEN_PLUS:
+                left += right;
+                break;
+            case TOKEN_MINUS:
+                left -= right;
+                break;
+            case TOKEN_STAR:
+                left *= right;
+                break;
+            case TOKEN_SLASH:
+                left /= right;
+                break;
+            default:
+                assert(false);
+        }
+
+
+        value_t val;
+        val.type = VAL_NUMBER;
+        val.val.number = left;
+        return val;
+    }
+
+    rterr("TODO: other expr types");
 }
 
 int main(int argc, char** argv) {
@@ -91,7 +113,6 @@ int main(int argc, char** argv) {
 
     stmt_list_t ast = { 0 };
     parse_program(&ast, &tokens);
-    free(code);
 
     value_t val = eval(ast.items[0]->as.assert_stmt.expression);
     printf("%lf", val.val.number);
