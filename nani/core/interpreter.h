@@ -4,7 +4,7 @@
 #include "common.h"
 #include "parser.h"
 
-void interpret(stmt_t* stmt);
+void interpret(const char* code, stmt_t* stmt);
 
 #endif
 
