@@ -8,9 +8,9 @@ static token_t* get_tok(tokens_t* tokens, int* pos) {
     if (*pos >= tokens->length) {
         // hack, but simpler than checking for NULL everywhere
         static token_t eof = {
-            .type = TOKEN_EOF,
-            .start = "[EOF]",
-            .length = 5,
+            .type = TOKEN_ERROR,
+            .start = "[ERROR]",
+            .length = 7,
             .line = -1,
         };
         return &eof;
@@ -168,9 +168,9 @@ expr_t* parse_comparison(tokens_t* tokens, int* pos) {
         case TOKEN_LESS_EQ:
         case TOKEN_GREATER:
         case TOKEN_GREATER_EQ:
-            return left;
-        default:
             break;
+        default:
+            return left;
     }
     (*pos)++;
 

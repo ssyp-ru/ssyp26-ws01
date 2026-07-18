@@ -121,7 +121,7 @@ const char* token_kind_name(token_kind_t type) {
         case TOKEN_THIS: return "THIS";
         case TOKEN_TRUE: return "TRUE";
         case TOKEN_WHILE: return "WHILE";
-        case TOKEN_EOF: return "EOF";
+        case TOKEN_ERROR: return "ERROR";
         default: return "UNKNOWN";
     }
 }
