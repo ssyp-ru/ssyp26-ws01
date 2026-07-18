@@ -41,16 +41,16 @@ expr_t * p_factor(lexer_t *lexer) {
 }
 
 expr_t * p_unary(lexer_t *lexer) {
+    // TODO: actual number parsing
     token_t t = get_token(lexer);
 
-    if (t.t == TOKEN_NUMBER) {
-        get_token(lexer);
+    if (t.t == TOKEN_NUMBER) { 
         char *number_start = lexer->orig + t.start;
         float real_value = strtof(number_start, NULL);
         return make_literal_expr(real_value);
     }
 
-    return NULL;
+    return make_literal_expr(1);
 }
 
 expr_t *make_literal_expr(float value) {
