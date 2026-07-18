@@ -95,7 +95,7 @@ void parse_program(stmt_list_t* ast, tokens_t* tokens) {
     log_debug("parse_program: pos=%d", pos);
     log_token("  cur token", get_tok(tokens, &pos));
 
-    while (get_tok(tokens, &pos)->type != TOKEN_ERROR) {
+    while (pos < tokens->length) {
         stmt_t* stmt = add_stmt(ast);
         parse_stmt(stmt, tokens, &pos);
     }

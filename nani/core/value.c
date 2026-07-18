@@ -1,6 +1,11 @@
 #include "value.h"
 #include <assert.h>
 
+static bool obj_equal(obj_t* a, obj_t* b) {
+    // TODO
+    assert(false);
+}
+
 bool val_equal(value_t* a, value_t* b) {
     if (a->type != b->type) return false;
 
@@ -14,8 +19,8 @@ bool val_equal(value_t* a, value_t* b) {
     case VAL_NUMBER:
         return a->val.number == b->val.number;
 
-    default:
-        assert(false);
+    case VAL_OBJ:
+        return obj_equal(a->val.object, a->val.object);
     }
 }
 
