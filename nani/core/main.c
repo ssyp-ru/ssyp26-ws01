@@ -143,7 +143,9 @@ int main(int argc, char** argv) {
     stmt_list_t ast = { 0 };
     parse_program(&ast, &tokens);
 
-    interpret(ast.items[0]);
+    for (int i = 0; i < ast.count; i++) {
+        interpret(ast.items[i]);
+    }
 
     return 0;
 }
