@@ -68,26 +68,41 @@ static value_t eval(expr_t* expr) {
         double right = eval(expr->value.binary.right).val.number;
 
         switch (expr->value.binary.op.type) {
-            case TOKEN_PLUS:
-                left += right;
-                break;
-            case TOKEN_MINUS:
-                left -= right;
-                break;
-            case TOKEN_STAR:
-                left *= right;
-                break;
-            case TOKEN_SLASH:
-                left /= right;
-                break;
-            default:
-                assert(false);
+        case TOKEN_PLUS:
+            left += right;
+            break;
+        case TOKEN_MINUS:
+            left -= right;
+            break;
+        case TOKEN_STAR:
+            left *= right;
+            break;
+        case TOKEN_SLASH:
+            left /= right;
+            break;
+        default:
+            assert(false);
         }
 
 
         value_t val;
         val.type = VAL_NUMBER;
         val.val.number = left;
+        return val;
+    }
+
+    if (expr->type == EXPR_LOGICAL) {
+        value_t left = eval(expr->value.logical.left);
+        value_t right = eval(expr->value.logical.right);
+
+        value_t val;
+        val.type = VAL_BOOL;
+        val.val.boolean = val_equal(&left, &right);
+
+        if (expr->value.logical.op.type == TOKEN_BANG_EQ) {
+            val.val.boolean = !val.val.boolean;
+        }
+
         return val;
     }
 
@@ -115,7 +130,7 @@ int main(int argc, char** argv) {
     parse_program(&ast, &tokens);
 
     value_t val = eval(ast.items[0]->as.assert_stmt.expression);
-    printf("%lf", val.val.number);
+    printf("%d", val.val.boolean);
 
     return 0;
 }
