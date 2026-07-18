@@ -2,8 +2,8 @@ CC := gcc
 VENDOR_DIR := ../../vendor
 CFLAGS := -ggdb -O0 -I$(VENDOR_DIR)
 LFLAGS := -ggdb
-HEADERS := common.h lexer.h value.h parser.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
-OBJECTS := main.o lexer.o parser.o value.o utils.o
+HEADERS := common.h lexer.h value.h parser.h interpreter.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
+OBJECTS := main.o lexer.o parser.o value.o interpreter.o utils.o
 
 all: nani
 
@@ -25,6 +25,9 @@ parser.o: parser.c $(HEADERS)
 
 value.o: value.c $(HEADERS)
 	$(CC) $(CFLAGS) -c value.c
+
+interpreter.o: interpreter.c $(HEADERS)
+	$(CC) $(CFLAGS) -c interpreter.c
 
 utils.o: $(VENDOR_DIR)/c_utils/utils.c $(VENDOR_DIR)/c_utils/utils.h
 	$(CC) $(CFLAGS) -c $(VENDOR_DIR)/c_utils/utils.c
