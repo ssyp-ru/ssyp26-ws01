@@ -29,12 +29,14 @@ static value_t eval(expr_t* expr) {
 
         switch (expr->value.literal.type) {
         case LITERAL_NUMBER:
-            token_t* tok = &expr->value.literal.lexeme;
-            char* end = (char*) tok->start + tok->length;
+            {
+                token_t *tok = &expr->value.literal.lexeme;
+                char* end = (char*) tok->start + tok->length;
 
-            val.type = VAL_NUMBER;
-            val.val.number = strtod(tok->start, &end);
-            break;
+                val.type = VAL_NUMBER;
+                val.val.number = strtod(tok->start, &end);
+                break;
+            }
         case LITERAL_BOOL:
             val.type = VAL_BOOL;
             val.val.boolean = expr->value.literal.lexeme.type == TOKEN_TRUE;
@@ -84,6 +86,8 @@ int main(int argc, char** argv) {
 
     tokens_t tokens = { 0 };
     if (!tokenize(&tokens, code)) return 1;
+
+    log_tokens(&tokens);
 
     stmt_list_t ast = { 0 };
     parse_program(&ast, &tokens);

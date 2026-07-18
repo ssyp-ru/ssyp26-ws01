@@ -63,5 +63,8 @@ typedef struct {
 } tokens_t;
 
 bool tokenize(tokens_t* tokens, const char* code);
+void log_token(const char* prefix, const token_t* token);
+void log_tokens(const tokens_t* tokens);
+const char* token_kind_name(token_kind_t type);
 
 #endif
