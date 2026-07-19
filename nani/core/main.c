@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "interpreter.h"
+#include "native.h"
 #include "c_utils/utils.h"
 
 static char* read_full(FILE* fp) {
@@ -39,6 +40,7 @@ int main(int argc, char** argv) {
     parse_program(&ast, &tokens);
 
     interpreter_t interpreter = {.code = code};
+    register_native_functions(&interpreter);
     for (int i = 0; i < ast.count; i++) {
         interpret(&interpreter, ast.items[i]);
     }

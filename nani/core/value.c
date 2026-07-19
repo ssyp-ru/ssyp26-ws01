@@ -3,6 +3,12 @@
 
 #include <assert.h>
 
+value_t nil_value() {
+    value_t value;
+    value.type = VAL_NIL;
+    return value;
+}
+
 static bool obj_equal(obj_t* a, obj_t* b) {
     // TODO
     assert(false);
