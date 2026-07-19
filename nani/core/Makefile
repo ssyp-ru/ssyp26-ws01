@@ -2,6 +2,11 @@ CC := gcc
 VENDOR_DIR := ../../vendor
 CFLAGS := -ggdb -O0 -I$(VENDOR_DIR) -Wall -Wpedantic -Werror
 LFLAGS := -ggdb
+
+ifeq ($(SANITIZE),1)
+CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+LFLAGS += -fsanitize=address -fno-omit-frame-pointer
+endif
 HEADERS := common.h lexer.h value.h parser.h interpreter.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
 OBJECTS := main.o lexer.o parser.o value.o interpreter.o utils.o common.o
 
