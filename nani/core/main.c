@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include "lexer.h"
 #include "parser.h"
 #include "interpreter.h"

@@ -35,7 +35,8 @@ static const char* get_line(const char* code, int line) {
     return "[Invalid line]";
 }
 
-[[noreturn]] static void rterr(const char* code, int line, const char* text) {
+__attribute__((__noreturn__))
+static void rterr(const char* code, int line, const char* text) {
     log_error("Runtime error on line %d: %s\n    %s", line, text, get_line(code, line));
     exit(1);
 }
@@ -166,4 +167,3 @@ void interpret(const char* code, stmt_t* stmt) {
         assert(false);
     }
 }
-
