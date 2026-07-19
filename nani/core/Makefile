@@ -1,5 +1,7 @@
 CC := gcc
 VENDOR_DIR := ../../vendor
+RAYLIB_DIR := $(VENDOR_DIR)/raylib/src
+RAYLIB_LIB := $(RAYLIB_DIR)/libraylib.a
 CFLAGS := -ggdb -O0 -I$(VENDOR_DIR) -Wall -Wpedantic -Werror
 LFLAGS := -ggdb
 
@@ -10,7 +12,7 @@ endif
 HEADERS := common.h lexer.h value.h parser.h interpreter.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
 OBJECTS := main.o lexer.o parser.o value.o interpreter.o utils.o common.o
 
-.PHONY: all build clean
+.PHONY: all build clean raylib
 
 all: build
 
@@ -19,9 +21,13 @@ build: nani
 clean:
 	rm -f calc *.o
 	rm nani
+	$(MAKE) -C $(RAYLIB_DIR) clean
 
-nani: $(OBJECTS)
-	$(CC) $(LFLAGS) -o nani $(OBJECTS)
+nani: $(OBJECTS) raylib
+	$(CC) $(LFLAGS) -o nani $(OBJECTS) $(RAYLIB_LIB)
+
+raylib:
+	$(MAKE) -C $(RAYLIB_DIR) RAYLIB_BUILD_MODE=DEBUG
 
 main.o: main.c $(HEADERS)
 	$(CC) $(CFLAGS) -c main.c
