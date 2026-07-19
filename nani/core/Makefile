@@ -1,6 +1,6 @@
 CC := gcc
 VENDOR_DIR := ../../vendor
-CFLAGS := -ggdb -O0 -I$(VENDOR_DIR)
+CFLAGS := -ggdb -O0 -I$(VENDOR_DIR) -Wall -Wpedantic -Werror
 LFLAGS := -ggdb
 HEADERS := common.h lexer.h value.h parser.h interpreter.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
 OBJECTS := main.o lexer.o parser.o value.o interpreter.o utils.o
