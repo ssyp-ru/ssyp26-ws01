@@ -78,11 +78,21 @@ static expr_t* make_binary_expr(expr_t* left, token_t op, expr_t* right) {
     return out;
 }
 
+expr_t* make_assign_expr(token_t op, expr_t* variable, expr_t* value) {
+    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
+    out->type = EXPR_ASSIGN;
+    out->line = op.line;
+    out->value.assign.name = variable->value.variable.name;
+    out->value.assign.value = value;
+    return out;
+}
+
 void free_ast(stmt_list_t* ast) {
     // TODO
 }
 
 static void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);
+expr_t* parse_assignment(tokens_t* tokens, int* pos);
 static expr_t* parse_or(tokens_t* tokens, int* pos);
 static expr_t* parse_and(tokens_t* tokens, int* pos);
 static expr_t* parse_equality(tokens_t* tokens, int* pos);
@@ -111,20 +121,54 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
 
     stmt->line = tok->line;
 
-    if (tok->type == TOKEN_ASSERT)
-        stmt->type = STMT_ASSERT;
-    else if (tok->type == TOKEN_PRINT)
-        stmt->type = STMT_PRINT;
-    else
-        err(tokens, pos, "Expected statement (assert or print)");
+    if (tok->type == TOKEN_LET) {
+        stmt->type = STMT_LET;
 
-    // hack
-    stmt->as.print.expression = parse_or(tokens, pos);
+        tok = get_tok(tokens, pos);
+        (*pos)++;
+        if (tok->type != TOKEN_IDENTIFIER)
+            err(tokens, pos, "Expected variable name");
+        stmt->as.let.name = *tok;
+        stmt->as.let.initializer = NULL;
+
+        tok = get_tok(tokens, pos);
+        if (tok->type == TOKEN_EQ) {
+            (*pos)++;
+            stmt->as.let.initializer = parse_assignment(tokens, pos);
+        }
+    } else if (tok->type == TOKEN_ASSERT) {
+        stmt->type = STMT_ASSERT;
+        stmt->as.assert_stmt.expression = parse_assignment(tokens, pos);
+    } else if (tok->type == TOKEN_PRINT) {
+        stmt->type = STMT_PRINT;
+        stmt->as.print.expression = parse_assignment(tokens, pos);
+    } else {
+        stmt->type = STMT_EXPRESSION;
+        (*pos)--;
+        stmt->as.expression.expression = parse_assignment(tokens, pos);
+    }
 
     tok = get_tok(tokens, pos);
     (*pos)++;
     if (tok->type != TOKEN_SEMICOLON)
         err(tokens, pos, "Expected semicolon");
+}
+
+expr_t* parse_assignment(tokens_t* tokens, int* pos) {
+    expr_t* left = parse_or(tokens, pos);
+
+    token_t* tok = get_tok(tokens, pos);
+    if (tok->type != TOKEN_EQ)
+        return left;
+    (*pos)++;
+
+    expr_t* value = parse_assignment(tokens, pos);
+    if (left->type != EXPR_VARIABLE)
+        err(tokens, pos, "Invalid assignment target");
+
+    expr_t* out = make_assign_expr(*tok, left, value);
+    free(left);
+    return out;
 }
 
 expr_t* parse_or(tokens_t* tokens, int* pos) {
@@ -241,7 +285,7 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
     (*pos)++;
 
     if (tok->type == TOKEN_LEFT_PAREN) {
-        expr_t* expr = parse_or(tokens, pos);
+        expr_t* expr = parse_assignment(tokens, pos);
 
         token_t* tok2 = get_tok(tokens, pos);
         (*pos)++;
@@ -260,9 +304,12 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
         out->value.literal.type = LITERAL_NUMBER;
     } else if (tok->type == TOKEN_TRUE || tok->type == TOKEN_FALSE) {
         out->value.literal.type = LITERAL_BOOL;
+    } else if (tok->type == TOKEN_IDENTIFIER) {
+        out->type = EXPR_VARIABLE;
+        out->value.variable.name = *tok;
     } else {
         free(out);
-        err(tokens, pos, "Expected primary (expr in parentheses, number, true or false)");
+        err(tokens, pos, "Expected primary (expr in parentheses, number, true, false or identifier)");
     }
 
     return out;
