@@ -1,4 +1,6 @@
 #include "value.h"
+#include "c_utils/utils.h"
+
 #include <assert.h>
 
 static bool obj_equal(obj_t* a, obj_t* b) {
@@ -22,5 +24,8 @@ bool val_equal(value_t* a, value_t* b) {
     case VAL_OBJ:
         return obj_equal(a->val.object, a->val.object);
     }
+    
+    log_error("Unknown value type: %d", a->type);
+    assert(0 && "internal error");
 }
 

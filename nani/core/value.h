@@ -2,6 +2,7 @@
 #define NANI_CORE_VALUE_H
 
 #include "common.h"
+#include <stdbool.h>
 
 typedef struct obj_t obj_t;
 

@@ -1,7 +1,9 @@
 #include "lexer.h"
 #include "c_utils/utils.h"
+
 #include <stdlib.h>
 #include <string.h>
+
 
 static bool is_digit(char c) {
     return c >= '0' && c <= '9';
