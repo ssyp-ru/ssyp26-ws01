@@ -2,6 +2,8 @@
 
 #include <raylib/src/raylib.h>
 
+#include <stdio.h>
+
 static double number_argument(interpreter_t* interpreter, int line, value_t* arguments, int index) {
     if (arguments[index].type != VAL_NUMBER)
         rterr(interpreter->code, line, "Expected number argument");
@@ -103,6 +105,19 @@ static value_t native_close_window(interpreter_t* interpreter, int line, value_t
     return nil_value();
 }
 
+static value_t native_readline(interpreter_t* interpreter, int line, value_t* arguments, int count) {
+    (void)interpreter;
+    (void)line;
+    (void)arguments;
+    (void)count;
+
+    int character;
+    while ((character = getchar()) != '\n' && character != EOF) {
+    }
+
+    return nil_value();
+}
+
 void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_init_window", 2, native_init_window);
     define_native_function(interpreter, "rl_window_should_close", 0, native_window_should_close);
@@ -113,4 +128,5 @@ void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_end_drawing", 0, native_end_drawing);
     define_native_function(interpreter, "rl_wait_time", 1, native_wait_time);
     define_native_function(interpreter, "rl_close_window", 0, native_close_window);
+    define_native_function(interpreter, "readline", 0, native_readline);
 }
