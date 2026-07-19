@@ -38,8 +38,9 @@ int main(int argc, char** argv) {
     stmt_list_t ast = {0};
     parse_program(&ast, &tokens);
 
+    interpreter_t interpreter = {.code = code};
     for (int i = 0; i < ast.count; i++) {
-        interpret(code, ast.items[i]);
+        interpret(&interpreter, ast.items[i]);
     }
 
     return 0;

@@ -4,6 +4,15 @@
 #include "common.h"
 #include "parser.h"
 
-void interpret(const char* code, stmt_t* stmt);
+typedef struct variable_t variable_t;
+
+typedef struct {
+    const char* code;
+    variable_t* globals;
+    int global_count;
+    int global_capacity;
+} interpreter_t;
+
+void interpret(interpreter_t* interpreter, stmt_t* stmt);
 
 #endif
