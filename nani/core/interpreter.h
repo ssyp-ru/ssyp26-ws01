@@ -7,4 +7,3 @@
 void interpret(const char* code, stmt_t* stmt);
 
 #endif
-

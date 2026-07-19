@@ -6,21 +6,19 @@
 #include <assert.h>
 #include <stdlib.h>
 
-
 static value_t eval(const char* code, expr_t* expr) {
     if (expr->type == EXPR_LITERAL) {
         value_t val;
 
         switch (expr->value.literal.type) {
-        case LITERAL_NUMBER:
-            {
-                token_t *tok = &expr->value.literal.lexeme;
-                char* end = (char*) tok->start + tok->length;
+        case LITERAL_NUMBER: {
+            token_t* tok = &expr->value.literal.lexeme;
+            char* end = (char*)tok->start + tok->length;
 
-                val.type = VAL_NUMBER;
-                val.val.number = strtod(tok->start, &end);
-                break;
-            }
+            val.type = VAL_NUMBER;
+            val.val.number = strtod(tok->start, &end);
+            break;
+        }
         case LITERAL_BOOL:
             val.type = VAL_BOOL;
             val.val.boolean = expr->value.literal.lexeme.type == TOKEN_TRUE;
@@ -35,14 +33,17 @@ static value_t eval(const char* code, expr_t* expr) {
         value_t inner = eval(code, expr->value.unary.right);
 
         if (expr->value.unary.op.type == TOKEN_MINUS) {
-            if (inner.type != VAL_NUMBER) rterr(code, expr->line, "Expected number after unary minus");
+            if (inner.type != VAL_NUMBER)
+                rterr(code, expr->line, "Expected number after unary minus");
 
             inner.val.number = -inner.val.number;
         } else if (expr->value.unary.op.type == TOKEN_BANG) {
-            if (inner.type != VAL_BOOL) rterr(code, expr->line, "Expected bool after unary bang");
+            if (inner.type != VAL_BOOL)
+                rterr(code, expr->line, "Expected bool after unary bang");
 
             inner.val.boolean = !inner.val.boolean;
-        } else assert(false);
+        } else
+            assert(false);
 
         return inner;
     }
@@ -91,22 +92,26 @@ static value_t eval(const char* code, expr_t* expr) {
             break;
 
         case TOKEN_LESS:
-            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr(code, expr->line, "comparision with non-numbers");
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER)
+                rterr(code, expr->line, "comparision with non-numbers");
             val.val.boolean = left.val.number < right.val.number;
             break;
 
         case TOKEN_LESS_EQ:
-            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr(code, expr->line, "comparision with non-numbers");
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER)
+                rterr(code, expr->line, "comparision with non-numbers");
             val.val.boolean = left.val.number <= right.val.number;
             break;
 
         case TOKEN_GREATER:
-            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr(code, expr->line, "comparision with non-numbers");
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER)
+                rterr(code, expr->line, "comparision with non-numbers");
             val.val.boolean = left.val.number > right.val.number;
             break;
 
         case TOKEN_GREATER_EQ:
-            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER) rterr(code, expr->line, "comparision with non-numbers");
+            if (left.type != VAL_NUMBER || right.type != VAL_NUMBER)
+                rterr(code, expr->line, "comparision with non-numbers");
             val.val.boolean = left.val.number >= right.val.number;
             break;
 
@@ -122,13 +127,14 @@ static value_t eval(const char* code, expr_t* expr) {
 
 void interpret(const char* code, stmt_t* stmt) {
     switch (stmt->type) {
-    case STMT_ASSERT:
-        {
-            value_t val = eval(code, stmt->as.assert_stmt.expression);
-            if (val.type != VAL_BOOL) rterr(code, stmt->line, "assert statement with non-bool value");
-            if (!val.val.boolean) rterr(code, stmt->line, "assertion failed");
-            break;
-        }
+    case STMT_ASSERT: {
+        value_t val = eval(code, stmt->as.assert_stmt.expression);
+        if (val.type != VAL_BOOL)
+            rterr(code, stmt->line, "assert statement with non-bool value");
+        if (!val.val.boolean)
+            rterr(code, stmt->line, "assertion failed");
+        break;
+    }
     default:
         assert(false);
     }

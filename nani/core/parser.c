@@ -27,7 +27,7 @@ static void err(tokens_t* tokens, int* pos, const char* text) {
 
     token_t* tok = get_tok(tokens, pos);
 
-    char* tokstr = (char*) malloc((tok->length + 1) * sizeof(char));
+    char* tokstr = (char*)malloc((tok->length + 1) * sizeof(char));
     memcpy(tokstr, tok->start, tok->length);
     tokstr[tok->length] = 0;
 
@@ -41,15 +41,15 @@ static stmt_t* add_stmt(stmt_list_t* ast) {
     if (!ast->items) {
         ast->count = 0;
         ast->capacity = 16;
-        ast->items = (stmt_t**) malloc(ast->capacity * sizeof(stmt_t*));
+        ast->items = (stmt_t**)malloc(ast->capacity * sizeof(stmt_t*));
     }
 
     if (ast->count == ast->capacity) {
         ast->capacity *= 2;
-        ast->items = (stmt_t**) realloc(ast->items, ast->capacity * sizeof(stmt_t*));
+        ast->items = (stmt_t**)realloc(ast->items, ast->capacity * sizeof(stmt_t*));
     }
 
-    stmt_t* stmt = (stmt_t*) malloc(sizeof(stmt_t));
+    stmt_t* stmt = (stmt_t*)malloc(sizeof(stmt_t));
     ast->items[ast->count++] = stmt;
     return stmt;
 }
@@ -57,7 +57,7 @@ static stmt_t* add_stmt(stmt_list_t* ast) {
 static expr_t* make_logical_expr(expr_t* left, token_t op, expr_t* right) {
     log_debug("create logical expr");
     log_token(" exrp token:", &op);
-    expr_t* out = (expr_t*) malloc(sizeof(expr_t));
+    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
     out->type = EXPR_LOGICAL;
     out->line = op.line;
     out->value.logical.op = op;
@@ -69,7 +69,7 @@ static expr_t* make_logical_expr(expr_t* left, token_t op, expr_t* right) {
 static expr_t* make_binary_expr(expr_t* left, token_t op, expr_t* right) {
     log_debug("create binary expr");
     log_token("  bin exrp token:", &op);
-    expr_t* out = (expr_t*) malloc(sizeof(expr_t));
+    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
     out->type = EXPR_BINARY;
     out->line = op.line;
     out->value.binary.op = op;
@@ -111,16 +111,20 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
 
     stmt->line = tok->line;
 
-    if (tok->type == TOKEN_ASSERT) stmt->type = STMT_ASSERT;
-    else if (tok->type == TOKEN_PRINT) stmt->type = STMT_PRINT;
-    else err(tokens, pos, "Expected statement (assert or print)");
+    if (tok->type == TOKEN_ASSERT)
+        stmt->type = STMT_ASSERT;
+    else if (tok->type == TOKEN_PRINT)
+        stmt->type = STMT_PRINT;
+    else
+        err(tokens, pos, "Expected statement (assert or print)");
 
     // hack
     stmt->as.print.expression = parse_or(tokens, pos);
 
     tok = get_tok(tokens, pos);
     (*pos)++;
-    if (tok->type != TOKEN_SEMICOLON) err(tokens, pos, "Expected semicolon");
+    if (tok->type != TOKEN_SEMICOLON)
+        err(tokens, pos, "Expected semicolon");
 }
 
 expr_t* parse_or(tokens_t* tokens, int* pos) {
@@ -129,7 +133,8 @@ expr_t* parse_or(tokens_t* tokens, int* pos) {
     expr_t* left = parse_and(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
-    if (tok->type != TOKEN_OR) return left;
+    if (tok->type != TOKEN_OR)
+        return left;
     (*pos)++;
 
     expr_t* right = parse_and(tokens, pos);
@@ -142,7 +147,8 @@ expr_t* parse_and(tokens_t* tokens, int* pos) {
     expr_t* left = parse_equality(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
-    if (tok->type != TOKEN_AND) return left;
+    if (tok->type != TOKEN_AND)
+        return left;
     (*pos)++;
 
     expr_t* right = parse_equality(tokens, pos);
@@ -155,7 +161,8 @@ expr_t* parse_equality(tokens_t* tokens, int* pos) {
     expr_t* left = parse_comparison(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
-    if (tok->type != TOKEN_EQ_EQ && tok->type != TOKEN_BANG_EQ) return left;
+    if (tok->type != TOKEN_EQ_EQ && tok->type != TOKEN_BANG_EQ)
+        return left;
     (*pos)++;
 
     expr_t* right = parse_comparison(tokens, pos);
@@ -169,13 +176,13 @@ expr_t* parse_comparison(tokens_t* tokens, int* pos) {
 
     token_t* tok = get_tok(tokens, pos);
     switch (tok->type) {
-        case TOKEN_LESS:
-        case TOKEN_LESS_EQ:
-        case TOKEN_GREATER:
-        case TOKEN_GREATER_EQ:
-            break;
-        default:
-            return left;
+    case TOKEN_LESS:
+    case TOKEN_LESS_EQ:
+    case TOKEN_GREATER:
+    case TOKEN_GREATER_EQ:
+        break;
+    default:
+        return left;
     }
     (*pos)++;
 
@@ -189,7 +196,8 @@ expr_t* parse_term(tokens_t* tokens, int* pos) {
     expr_t* left = parse_factor(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
-    if (tok->type != TOKEN_PLUS && tok->type != TOKEN_MINUS) return left;
+    if (tok->type != TOKEN_PLUS && tok->type != TOKEN_MINUS)
+        return left;
     (*pos)++;
 
     expr_t* right = parse_factor(tokens, pos);
@@ -202,7 +210,8 @@ expr_t* parse_factor(tokens_t* tokens, int* pos) {
     expr_t* left = parse_unary(tokens, pos);
 
     token_t* tok = get_tok(tokens, pos);
-    if (tok->type != TOKEN_STAR && tok->type != TOKEN_SLASH) return left;
+    if (tok->type != TOKEN_STAR && tok->type != TOKEN_SLASH)
+        return left;
     (*pos)++;
 
     expr_t* right = parse_unary(tokens, pos);
@@ -213,10 +222,11 @@ expr_t* parse_unary(tokens_t* tokens, int* pos) {
     log_debug("parse_unary: pos=%d", *pos);
     log_token("  cur token", get_tok(tokens, pos));
     token_t* tok = get_tok(tokens, pos);
-    if (tok->type != TOKEN_BANG && tok->type != TOKEN_MINUS) return parse_primary(tokens, pos);
+    if (tok->type != TOKEN_BANG && tok->type != TOKEN_MINUS)
+        return parse_primary(tokens, pos);
     (*pos)++;
 
-    expr_t* out = (expr_t*) malloc(sizeof(expr_t));
+    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
     out->type = EXPR_UNARY;
     out->line = tok->line;
     out->value.unary.op = *tok;
@@ -235,12 +245,13 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
 
         token_t* tok2 = get_tok(tokens, pos);
         (*pos)++;
-        if (tok2->type != TOKEN_RIGHT_PAREN) err(tokens, pos, "Expected right parentheses");
+        if (tok2->type != TOKEN_RIGHT_PAREN)
+            err(tokens, pos, "Expected right parentheses");
 
         return expr;
     }
 
-    expr_t* out = (expr_t*) malloc(sizeof(expr_t));
+    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
     out->line = tok->line;
     out->type = EXPR_LITERAL;
     out->value.literal.lexeme = *tok;

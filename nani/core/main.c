@@ -10,7 +10,7 @@ static char* read_full(FILE* fp) {
     long size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    char* output = (char*) malloc(size + 1);
+    char* output = (char*)malloc(size + 1);
     fread(output, 1, size, fp);
     output[size] = 0;
 
@@ -29,12 +29,13 @@ int main(int argc, char** argv) {
     const char* code = read_full(fp);
     fclose(fp);
 
-    tokens_t tokens = { 0 };
-    if (!tokenize(&tokens, code)) return 1;
+    tokens_t tokens = {0};
+    if (!tokenize(&tokens, code))
+        return 1;
 
     log_tokens(&tokens);
 
-    stmt_list_t ast = { 0 };
+    stmt_list_t ast = {0};
     parse_program(&ast, &tokens);
 
     for (int i = 0; i < ast.count; i++) {

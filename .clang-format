@@ -1,0 +1,16 @@
+---
+# First-party C code uses four spaces, attached braces, and left-bound pointers.
+# Do not apply this configuration to generated or vendored code.
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 120
+PointerAlignment: Left
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: None
+AllowShortEnumsOnASingleLine: false
+SpaceBeforeParens: ControlStatements
+SortIncludes: Never
+...

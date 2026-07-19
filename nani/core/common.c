@@ -7,7 +7,7 @@ static char* linedup(const char* start) {
     const char* end = strchr(start, '\n');
     int len = end - start;
 
-    char* output = (char*) malloc(len);
+    char* output = (char*)malloc(len);
     memcpy(output, start, len);
     output[len] = 0;
 
@@ -26,14 +26,14 @@ static const char* get_line(const char* code, int line) {
             return linedup(start);
         }
 
-        if (code[i] == '\n') cur++;
+        if (code[i] == '\n')
+            cur++;
     }
 
     return "[Invalid line]";
 }
 
-__attribute__((__noreturn__))
-void rterr(const char* code, int line, const char* text) {
+__attribute__((__noreturn__)) void rterr(const char* code, int line, const char* text) {
     log_error("Runtime error on line %d: %s\n    %s", line, text, get_line(code, line));
     exit(1);
 }
