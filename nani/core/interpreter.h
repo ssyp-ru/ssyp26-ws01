@@ -5,12 +5,20 @@
 #include "parser.h"
 
 typedef struct variable_t variable_t;
+typedef struct function_t function_t;
+
+typedef struct {
+    variable_t* variables;
+    int count;
+    int capacity;
+} variable_list_t;
 
 typedef struct {
     const char* code;
-    variable_t* globals;
-    int global_count;
-    int global_capacity;
+    variable_list_t globals;
+    function_t* functions;
+    int function_count;
+    int function_capacity;
 } interpreter_t;
 
 void interpret(interpreter_t* interpreter, stmt_t* stmt);
