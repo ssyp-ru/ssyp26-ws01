@@ -13,10 +13,20 @@ struct variable_t {
     value_t value;
 };
 
+typedef enum {
+    FUNCTION_USER,
+    FUNCTION_NATIVE,
+} function_type_t;
+
 struct function_t {
     char* name;
     int name_length;
-    function_decl_t declaration;
+    function_type_t type;
+    int arity;
+    union {
+        function_decl_t declaration;
+        native_function_t native;
+    } as;
 };
 
 value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr);
@@ -118,25 +128,56 @@ int find_function(interpreter_t* interpreter, token_t name) {
 
 void define_function(interpreter_t* interpreter, function_decl_t declaration) {
     int index = find_function(interpreter, declaration.name);
-    if (index >= 0) {
-        interpreter->functions[index].declaration = declaration;
-        return;
+    if (index < 0) {
+        if (interpreter->function_count == interpreter->function_capacity) {
+            interpreter->function_capacity = interpreter->function_capacity ? interpreter->function_capacity * 2 : 16;
+            interpreter->functions =
+                (function_t*)realloc(interpreter->functions, interpreter->function_capacity * sizeof(function_t));
+        }
+
+        char* function_name = (char*)malloc(declaration.name.length + 1);
+        memcpy(function_name, declaration.name.start, declaration.name.length);
+        function_name[declaration.name.length] = '\0';
+
+        index = interpreter->function_count++;
+        interpreter->functions[index].name = function_name;
+        interpreter->functions[index].name_length = declaration.name.length;
     }
 
-    if (interpreter->function_count == interpreter->function_capacity) {
-        interpreter->function_capacity = interpreter->function_capacity ? interpreter->function_capacity * 2 : 16;
-        interpreter->functions =
-            (function_t*)realloc(interpreter->functions, interpreter->function_capacity * sizeof(function_t));
+    function_t* function = &interpreter->functions[index];
+    function->type = FUNCTION_USER;
+    function->arity = declaration.parameter_count;
+    function->as.declaration = declaration;
+}
+
+void define_native_function(interpreter_t* interpreter, const char* name, int arity, native_function_t native) {
+    token_t token = {
+        .type = TOKEN_IDENTIFIER,
+        .start = name,
+        .length = (int)strlen(name),
+        .line = 0,
+    };
+    int index = find_function(interpreter, token);
+    if (index < 0) {
+        if (interpreter->function_count == interpreter->function_capacity) {
+            interpreter->function_capacity = interpreter->function_capacity ? interpreter->function_capacity * 2 : 16;
+            interpreter->functions =
+                (function_t*)realloc(interpreter->functions, interpreter->function_capacity * sizeof(function_t));
+        }
+
+        char* function_name = (char*)malloc(token.length + 1);
+        memcpy(function_name, name, token.length);
+        function_name[token.length] = '\0';
+
+        index = interpreter->function_count++;
+        interpreter->functions[index].name = function_name;
+        interpreter->functions[index].name_length = token.length;
     }
 
-    char* function_name = (char*)malloc(declaration.name.length + 1);
-    memcpy(function_name, declaration.name.start, declaration.name.length);
-    function_name[declaration.name.length] = '\0';
-
-    function_t* function = &interpreter->functions[interpreter->function_count++];
-    function->name = function_name;
-    function->name_length = declaration.name.length;
-    function->declaration = declaration;
+    function_t* function = &interpreter->functions[index];
+    function->type = FUNCTION_NATIVE;
+    function->arity = arity;
+    function->as.native = native;
 }
 
 value_t call_function(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) {
@@ -148,18 +189,29 @@ value_t call_function(interpreter_t* interpreter, variable_list_t* locals, expr_
     if (index < 0)
         rterr(interpreter->code, expr->line, "Undefined function");
 
-    function_decl_t* declaration = &interpreter->functions[index].declaration;
-    if (expr->value.call.arguments.count != declaration->parameter_count)
+    function_t* function = &interpreter->functions[index];
+    if (expr->value.call.arguments.count != function->arity)
         rterr(interpreter->code, expr->line, "Wrong number of arguments");
 
-    variable_list_t function_locals = {0};
-    for (int i = 0; i < declaration->parameter_count; i++) {
-        value_t value = eval(interpreter, locals, expr->value.call.arguments.items[i]);
-        define_variable(&function_locals, declaration->parameters[i], value);
+    value_t* arguments = (value_t*)malloc(function->arity * sizeof(value_t));
+    for (int i = 0; i < function->arity; i++) {
+        arguments[i] = eval(interpreter, locals, expr->value.call.arguments.items[i]);
     }
 
-    value_t return_value;
-    return_value.type = VAL_NIL;
+    if (function->type == FUNCTION_NATIVE) {
+        value_t value = function->as.native(interpreter, expr->line, arguments, function->arity);
+        free(arguments);
+        return value;
+    }
+
+    function_decl_t* declaration = &function->as.declaration;
+    variable_list_t function_locals = {0};
+    for (int i = 0; i < declaration->parameter_count; i++) {
+        define_variable(&function_locals, declaration->parameters[i], arguments[i]);
+    }
+    free(arguments);
+
+    value_t return_value = nil_value();
     for (int i = 0; i < declaration->body.count; i++) {
         if (execute_statement(interpreter, &function_locals, declaration->body.items[i], &return_value))
             break;
@@ -307,7 +359,7 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
         if (stmt->as.let.initializer)
             value = eval(interpreter, locals, stmt->as.let.initializer);
         else
-            value.type = VAL_NIL;
+            value = nil_value();
 
         if (locals)
             define_variable(locals, stmt->as.let.name, value);
@@ -335,7 +387,7 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
         if (stmt->as.return_stmt.value)
             *return_value = eval(interpreter, locals, stmt->as.return_stmt.value);
         else
-            return_value->type = VAL_NIL;
+            *return_value = nil_value();
         return 1;
     default:
         assert(false);

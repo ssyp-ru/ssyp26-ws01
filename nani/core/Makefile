@@ -2,15 +2,23 @@ CC := gcc
 VENDOR_DIR := ../../vendor
 RAYLIB_DIR := $(VENDOR_DIR)/raylib/src
 RAYLIB_LIB := $(RAYLIB_DIR)/libraylib.a
-CFLAGS := -ggdb -O0 -I$(VENDOR_DIR) -Wall -Wpedantic -Werror
+UNAME_S := $(shell uname -s)
+CFLAGS := -ggdb -O0 -I$(VENDOR_DIR) -Wall -Wpedantic -Werror -Wno-strict-prototypes
 LFLAGS := -ggdb
+
+ifeq ($(UNAME_S),Darwin)
+RAYLIB_LFLAGS := -framework OpenGL -framework Cocoa -framework IOKit -framework CoreAudio -framework CoreVideo
+endif
+ifeq ($(UNAME_S),Linux)
+RAYLIB_LFLAGS := -lGL -lc -lm -lpthread -ldl -lrt -lX11
+endif
 
 ifeq ($(SANITIZE),1)
 CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 LFLAGS += -fsanitize=address -fno-omit-frame-pointer
 endif
-HEADERS := common.h lexer.h value.h parser.h interpreter.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
-OBJECTS := main.o lexer.o parser.o value.o interpreter.o utils.o common.o
+HEADERS := common.h lexer.h value.h parser.h interpreter.h native.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
+OBJECTS := main.o lexer.o parser.o value.o interpreter.o native.o utils.o common.o
 
 .PHONY: all build clean raylib
 
@@ -24,7 +32,7 @@ clean:
 	$(MAKE) -C $(RAYLIB_DIR) clean
 
 nani: $(OBJECTS) raylib
-	$(CC) $(LFLAGS) -o nani $(OBJECTS) $(RAYLIB_LIB)
+	$(CC) $(LFLAGS) -o nani $(OBJECTS) $(RAYLIB_LIB) $(RAYLIB_LFLAGS)
 
 raylib:
 	$(MAKE) -C $(RAYLIB_DIR) RAYLIB_BUILD_MODE=DEBUG
@@ -43,6 +51,9 @@ value.o: value.c $(HEADERS)
 
 interpreter.o: interpreter.c $(HEADERS)
 	$(CC) $(CFLAGS) -c interpreter.c
+
+native.o: native.c $(HEADERS) $(RAYLIB_DIR)/raylib.h
+	$(CC) $(CFLAGS) -c native.c
 
 common.o: common.c $(HEADERS)
 	$(CC) $(CFLAGS) -c common.c

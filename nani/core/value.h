@@ -22,6 +22,7 @@ typedef struct {
     } val;
 } value_t;
 
+value_t nil_value();
 bool val_equal(value_t* a, value_t* b);
 
 #endif
