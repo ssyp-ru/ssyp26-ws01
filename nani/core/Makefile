@@ -3,9 +3,13 @@ VENDOR_DIR := ../../vendor
 CFLAGS := -ggdb -O0 -I$(VENDOR_DIR) -Wall -Wpedantic -Werror
 LFLAGS := -ggdb
 HEADERS := common.h lexer.h value.h parser.h interpreter.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
-OBJECTS := main.o lexer.o parser.o value.o interpreter.o utils.o
+OBJECTS := main.o lexer.o parser.o value.o interpreter.o utils.o common.o
 
-all: nani
+.PHONY: all build clean
+
+all: build
+
+build: nani
 
 clean:
 	rm -f calc *.o
@@ -28,6 +32,9 @@ value.o: value.c $(HEADERS)
 
 interpreter.o: interpreter.c $(HEADERS)
 	$(CC) $(CFLAGS) -c interpreter.c
+
+common.o: common.c $(HEADERS)
+	$(CC) $(CFLAGS) -c common.c
 
 utils.o: $(VENDOR_DIR)/c_utils/utils.c $(VENDOR_DIR)/c_utils/utils.h
 	$(CC) $(CFLAGS) -c $(VENDOR_DIR)/c_utils/utils.c

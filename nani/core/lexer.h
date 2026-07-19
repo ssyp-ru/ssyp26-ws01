@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#include <stdbool.h>
+
 typedef enum {
     TOKEN_LEFT_PAREN,
     TOKEN_RIGHT_PAREN,
