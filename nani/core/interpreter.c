@@ -13,37 +13,59 @@ struct variable_t {
     value_t value;
 };
 
-int find_global(interpreter_t* interpreter, token_t name) {
-    for (int i = 0; i < interpreter->global_count; i++) {
-        if (interpreter->globals[i].name_length == name.length &&
-            !memcmp(interpreter->globals[i].name, name.start, name.length))
+struct function_t {
+    char* name;
+    int name_length;
+    function_decl_t declaration;
+};
+
+value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr);
+int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_t* stmt, value_t* return_value);
+
+int find_variable(variable_t* variables, int count, token_t name) {
+    for (int i = 0; i < count; i++) {
+        if (variables[i].name_length == name.length && !memcmp(variables[i].name, name.start, name.length))
             return i;
     }
 
     return -1;
 }
 
-void define_global(interpreter_t* interpreter, token_t name, value_t value) {
-    int index = find_global(interpreter, name);
+void define_variable(variable_list_t* variables, token_t name, value_t value) {
+    int index = find_variable(variables->variables, variables->count, name);
     if (index >= 0) {
-        interpreter->globals[index].value = value;
+        variables->variables[index].value = value;
         return;
     }
 
-    if (interpreter->global_count == interpreter->global_capacity) {
-        interpreter->global_capacity = interpreter->global_capacity ? interpreter->global_capacity * 2 : 16;
-        interpreter->globals =
-            (variable_t*)realloc(interpreter->globals, interpreter->global_capacity * sizeof(variable_t));
+    if (variables->count == variables->capacity) {
+        variables->capacity = variables->capacity ? variables->capacity * 2 : 16;
+        variables->variables = (variable_t*)realloc(variables->variables, variables->capacity * sizeof(variable_t));
     }
 
-    char* global_name = (char*)malloc(name.length + 1);
-    memcpy(global_name, name.start, name.length);
-    global_name[name.length] = '\0';
+    char* variable_name = (char*)malloc(name.length + 1);
+    memcpy(variable_name, name.start, name.length);
+    variable_name[name.length] = '\0';
 
-    interpreter->globals[interpreter->global_count].name = global_name;
-    interpreter->globals[interpreter->global_count].name_length = name.length;
-    interpreter->globals[interpreter->global_count].value = value;
-    interpreter->global_count++;
+    variables->variables[variables->count].name = variable_name;
+    variables->variables[variables->count].name_length = name.length;
+    variables->variables[variables->count].value = value;
+    variables->count++;
+}
+
+void free_variables(variable_list_t* variables) {
+    for (int i = 0; i < variables->count; i++) {
+        free(variables->variables[i].name);
+    }
+    free(variables->variables);
+}
+
+int find_global(interpreter_t* interpreter, token_t name) {
+    return find_variable(interpreter->globals.variables, interpreter->globals.count, name);
+}
+
+void define_global(interpreter_t* interpreter, token_t name, value_t value) {
+    define_variable(&interpreter->globals, name, value);
 }
 
 value_t get_global(interpreter_t* interpreter, int line, token_t name) {
@@ -51,7 +73,7 @@ value_t get_global(interpreter_t* interpreter, int line, token_t name) {
     if (index < 0)
         rterr(interpreter->code, line, "Undefined variable");
 
-    return interpreter->globals[index].value;
+    return interpreter->globals.variables[index].value;
 }
 
 void assign_global(interpreter_t* interpreter, int line, token_t name, value_t value) {
@@ -59,10 +81,95 @@ void assign_global(interpreter_t* interpreter, int line, token_t name, value_t v
     if (index < 0)
         rterr(interpreter->code, line, "Undefined variable");
 
-    interpreter->globals[index].value = value;
+    interpreter->globals.variables[index].value = value;
 }
 
-static value_t eval(interpreter_t* interpreter, expr_t* expr) {
+value_t get_variable(interpreter_t* interpreter, variable_list_t* locals, int line, token_t name) {
+    if (locals) {
+        int index = find_variable(locals->variables, locals->count, name);
+        if (index >= 0)
+            return locals->variables[index].value;
+    }
+
+    return get_global(interpreter, line, name);
+}
+
+void assign_variable(interpreter_t* interpreter, variable_list_t* locals, int line, token_t name, value_t value) {
+    if (locals) {
+        int index = find_variable(locals->variables, locals->count, name);
+        if (index >= 0) {
+            locals->variables[index].value = value;
+            return;
+        }
+    }
+
+    assign_global(interpreter, line, name, value);
+}
+
+int find_function(interpreter_t* interpreter, token_t name) {
+    for (int i = 0; i < interpreter->function_count; i++) {
+        if (interpreter->functions[i].name_length == name.length &&
+            !memcmp(interpreter->functions[i].name, name.start, name.length))
+            return i;
+    }
+
+    return -1;
+}
+
+void define_function(interpreter_t* interpreter, function_decl_t declaration) {
+    int index = find_function(interpreter, declaration.name);
+    if (index >= 0) {
+        interpreter->functions[index].declaration = declaration;
+        return;
+    }
+
+    if (interpreter->function_count == interpreter->function_capacity) {
+        interpreter->function_capacity = interpreter->function_capacity ? interpreter->function_capacity * 2 : 16;
+        interpreter->functions =
+            (function_t*)realloc(interpreter->functions, interpreter->function_capacity * sizeof(function_t));
+    }
+
+    char* function_name = (char*)malloc(declaration.name.length + 1);
+    memcpy(function_name, declaration.name.start, declaration.name.length);
+    function_name[declaration.name.length] = '\0';
+
+    function_t* function = &interpreter->functions[interpreter->function_count++];
+    function->name = function_name;
+    function->name_length = declaration.name.length;
+    function->declaration = declaration;
+}
+
+value_t call_function(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) {
+    if (expr->value.call.callee->type != EXPR_VARIABLE)
+        rterr(interpreter->code, expr->line, "Can only call named functions");
+
+    token_t name = expr->value.call.callee->value.variable.name;
+    int index = find_function(interpreter, name);
+    if (index < 0)
+        rterr(interpreter->code, expr->line, "Undefined function");
+
+    function_decl_t* declaration = &interpreter->functions[index].declaration;
+    if (expr->value.call.arguments.count != declaration->parameter_count)
+        rterr(interpreter->code, expr->line, "Wrong number of arguments");
+
+    variable_list_t function_locals = {0};
+    for (int i = 0; i < declaration->parameter_count; i++) {
+        value_t value = eval(interpreter, locals, expr->value.call.arguments.items[i]);
+        define_variable(&function_locals, declaration->parameters[i], value);
+    }
+
+    value_t return_value;
+    return_value.type = VAL_NIL;
+    for (int i = 0; i < declaration->body.count; i++) {
+        if (execute_statement(interpreter, &function_locals, declaration->body.items[i], &return_value))
+            break;
+    }
+
+    free_variables(&function_locals);
+    return return_value;
+}
+
+value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) {
     if (expr->type == EXPR_LITERAL) {
         value_t val;
 
@@ -86,16 +193,19 @@ static value_t eval(interpreter_t* interpreter, expr_t* expr) {
     }
 
     if (expr->type == EXPR_VARIABLE)
-        return get_global(interpreter, expr->line, expr->value.variable.name);
+        return get_variable(interpreter, locals, expr->line, expr->value.variable.name);
 
     if (expr->type == EXPR_ASSIGN) {
-        value_t value = eval(interpreter, expr->value.assign.value);
-        assign_global(interpreter, expr->line, expr->value.assign.name, value);
+        value_t value = eval(interpreter, locals, expr->value.assign.value);
+        assign_variable(interpreter, locals, expr->line, expr->value.assign.name, value);
         return value;
     }
 
+    if (expr->type == EXPR_CALL)
+        return call_function(interpreter, locals, expr);
+
     if (expr->type == EXPR_UNARY) {
-        value_t inner = eval(interpreter, expr->value.unary.right);
+        value_t inner = eval(interpreter, locals, expr->value.unary.right);
 
         if (expr->value.unary.op.type == TOKEN_MINUS) {
             if (inner.type != VAL_NUMBER)
@@ -114,8 +224,8 @@ static value_t eval(interpreter_t* interpreter, expr_t* expr) {
     }
 
     if (expr->type == EXPR_BINARY) {
-        double left = eval(interpreter, expr->value.binary.left).val.number;
-        double right = eval(interpreter, expr->value.binary.right).val.number;
+        double left = eval(interpreter, locals, expr->value.binary.left).val.number;
+        double right = eval(interpreter, locals, expr->value.binary.right).val.number;
 
         switch (expr->value.binary.op.type) {
         case TOKEN_PLUS:
@@ -141,8 +251,8 @@ static value_t eval(interpreter_t* interpreter, expr_t* expr) {
     }
 
     if (expr->type == EXPR_LOGICAL) {
-        value_t left = eval(interpreter, expr->value.logical.left);
-        value_t right = eval(interpreter, expr->value.logical.right);
+        value_t left = eval(interpreter, locals, expr->value.logical.left);
+        value_t right = eval(interpreter, locals, expr->value.logical.right);
 
         value_t val;
         val.type = VAL_BOOL;
@@ -190,29 +300,49 @@ static value_t eval(interpreter_t* interpreter, expr_t* expr) {
     rterr(interpreter->code, expr->line, "TODO: other expr types");
 }
 
-void interpret(interpreter_t* interpreter, stmt_t* stmt) {
+int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_t* stmt, value_t* return_value) {
     switch (stmt->type) {
     case STMT_LET: {
         value_t value;
         if (stmt->as.let.initializer)
-            value = eval(interpreter, stmt->as.let.initializer);
+            value = eval(interpreter, locals, stmt->as.let.initializer);
         else
             value.type = VAL_NIL;
-        define_global(interpreter, stmt->as.let.name, value);
-        break;
+
+        if (locals)
+            define_variable(locals, stmt->as.let.name, value);
+        else
+            define_global(interpreter, stmt->as.let.name, value);
+        return 0;
     }
     case STMT_EXPRESSION:
-        eval(interpreter, stmt->as.expression.expression);
-        break;
+        eval(interpreter, locals, stmt->as.expression.expression);
+        return 0;
     case STMT_ASSERT: {
-        value_t val = eval(interpreter, stmt->as.assert_stmt.expression);
+        value_t val = eval(interpreter, locals, stmt->as.assert_stmt.expression);
         if (val.type != VAL_BOOL)
             rterr(interpreter->code, stmt->line, "assert statement with non-bool value");
         if (!val.val.boolean)
             rterr(interpreter->code, stmt->line, "assertion failed");
-        break;
+        return 0;
     }
+    case STMT_FUNCTION:
+        define_function(interpreter, stmt->as.function.declaration);
+        return 0;
+    case STMT_RETURN:
+        if (!locals)
+            rterr(interpreter->code, stmt->line, "Return outside function");
+        if (stmt->as.return_stmt.value)
+            *return_value = eval(interpreter, locals, stmt->as.return_stmt.value);
+        else
+            return_value->type = VAL_NIL;
+        return 1;
     default:
         assert(false);
     }
+}
+
+void interpret(interpreter_t* interpreter, stmt_t* stmt) {
+    value_t return_value;
+    execute_statement(interpreter, NULL, stmt, &return_value);
 }

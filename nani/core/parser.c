@@ -87,11 +87,67 @@ expr_t* make_assign_expr(token_t op, expr_t* variable, expr_t* value) {
     return out;
 }
 
+static expr_t* make_unary_expr(token_t op, expr_t* right) {
+    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
+    out->type = EXPR_UNARY;
+    out->line = op.line;
+    out->value.unary.op = op;
+    out->value.unary.right = right;
+    return out;
+}
+
+static expr_t* make_call_expr(expr_t* callee, token_t paren, expr_list_t arguments) {
+    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
+    out->type = EXPR_CALL;
+    out->line = paren.line;
+    out->value.call.callee = callee;
+    out->value.call.paren = paren;
+    out->value.call.arguments = arguments;
+    return out;
+}
+
+static expr_t* make_literal_expr(token_t lexeme, literal_type_t type) {
+    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
+    out->line = lexeme.line;
+    out->type = EXPR_LITERAL;
+    out->value.literal.lexeme = lexeme;
+    out->value.literal.type = type;
+    return out;
+}
+
+static expr_t* make_variable_expr(token_t name) {
+    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
+    out->line = name.line;
+    out->type = EXPR_VARIABLE;
+    out->value.variable.name = name;
+    return out;
+}
+
+void add_expr(expr_list_t* expressions, expr_t* expression) {
+    if (expressions->count == expressions->capacity) {
+        expressions->capacity = expressions->capacity ? expressions->capacity * 2 : 8;
+        expressions->items = (expr_t**)realloc(expressions->items, expressions->capacity * sizeof(expr_t*));
+    }
+
+    expressions->items[expressions->count++] = expression;
+}
+
+void add_parameter(function_decl_t* declaration, token_t parameter) {
+    if (declaration->parameter_count == declaration->parameter_capacity) {
+        declaration->parameter_capacity = declaration->parameter_capacity ? declaration->parameter_capacity * 2 : 8;
+        declaration->parameters =
+            (token_t*)realloc(declaration->parameters, declaration->parameter_capacity * sizeof(token_t));
+    }
+
+    declaration->parameters[declaration->parameter_count++] = parameter;
+}
+
 void free_ast(stmt_list_t* ast) {
     // TODO
 }
 
 static void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);
+static void parse_function_declaration(stmt_t* stmt, tokens_t* tokens, int* pos);
 expr_t* parse_assignment(tokens_t* tokens, int* pos);
 static expr_t* parse_or(tokens_t* tokens, int* pos);
 static expr_t* parse_and(tokens_t* tokens, int* pos);
@@ -100,6 +156,7 @@ static expr_t* parse_comparison(tokens_t* tokens, int* pos);
 static expr_t* parse_term(tokens_t* tokens, int* pos);
 static expr_t* parse_factor(tokens_t* tokens, int* pos);
 static expr_t* parse_unary(tokens_t* tokens, int* pos);
+static expr_t* parse_call(tokens_t* tokens, int* pos);
 static expr_t* parse_primary(tokens_t* tokens, int* pos);
 
 void parse_program(stmt_list_t* ast, tokens_t* tokens) {
@@ -121,7 +178,10 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
 
     stmt->line = tok->line;
 
-    if (tok->type == TOKEN_LET) {
+    if (tok->type == TOKEN_FN) {
+        parse_function_declaration(stmt, tokens, pos);
+        return;
+    } else if (tok->type == TOKEN_LET) {
         stmt->type = STMT_LET;
 
         tok = get_tok(tokens, pos);
@@ -142,6 +202,13 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
     } else if (tok->type == TOKEN_PRINT) {
         stmt->type = STMT_PRINT;
         stmt->as.print.expression = parse_assignment(tokens, pos);
+    } else if (tok->type == TOKEN_RETURN) {
+        stmt->type = STMT_RETURN;
+        stmt->as.return_stmt.keyword = *tok;
+        if (get_tok(tokens, pos)->type == TOKEN_SEMICOLON)
+            stmt->as.return_stmt.value = NULL;
+        else
+            stmt->as.return_stmt.value = parse_assignment(tokens, pos);
     } else {
         stmt->type = STMT_EXPRESSION;
         (*pos)--;
@@ -152,6 +219,63 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
     (*pos)++;
     if (tok->type != TOKEN_SEMICOLON)
         err(tokens, pos, "Expected semicolon");
+}
+
+static void parse_function_declaration(stmt_t* stmt, tokens_t* tokens, int* pos) {
+    stmt->type = STMT_FUNCTION;
+    function_decl_t* declaration = &stmt->as.function.declaration;
+    declaration->parameters = NULL;
+    declaration->parameter_count = 0;
+    declaration->parameter_capacity = 0;
+    declaration->body.items = NULL;
+    declaration->body.count = 0;
+    declaration->body.capacity = 0;
+
+    token_t* tok = get_tok(tokens, pos);
+    (*pos)++;
+    if (tok->type != TOKEN_IDENTIFIER)
+        err(tokens, pos, "Expected function name");
+    declaration->name = *tok;
+
+    tok = get_tok(tokens, pos);
+    (*pos)++;
+    if (tok->type != TOKEN_LEFT_PAREN)
+        err(tokens, pos, "Expected left parentheses");
+
+    if (get_tok(tokens, pos)->type != TOKEN_RIGHT_PAREN) {
+        while (1) {
+            tok = get_tok(tokens, pos);
+            (*pos)++;
+            if (tok->type != TOKEN_IDENTIFIER)
+                err(tokens, pos, "Expected parameter name");
+            add_parameter(declaration, *tok);
+
+            tok = get_tok(tokens, pos);
+            (*pos)++;
+            if (tok->type == TOKEN_RIGHT_PAREN)
+                break;
+            if (tok->type != TOKEN_COMMA)
+                err(tokens, pos, "Expected comma or right parentheses");
+        }
+    } else {
+        (*pos)++;
+    }
+
+    tok = get_tok(tokens, pos);
+    (*pos)++;
+    if (tok->type != TOKEN_LEFT_BRACE)
+        err(tokens, pos, "Expected left brace");
+
+    while (get_tok(tokens, pos)->type != TOKEN_RIGHT_BRACE) {
+        if (*pos >= tokens->length) {
+            (*pos)++;
+            err(tokens, pos, "Expected right brace");
+        }
+
+        stmt_t* body_stmt = add_stmt(&declaration->body);
+        parse_stmt(body_stmt, tokens, pos);
+    }
+    (*pos)++;
 }
 
 expr_t* parse_assignment(tokens_t* tokens, int* pos) {
@@ -267,15 +391,38 @@ expr_t* parse_unary(tokens_t* tokens, int* pos) {
     log_token("  cur token", get_tok(tokens, pos));
     token_t* tok = get_tok(tokens, pos);
     if (tok->type != TOKEN_BANG && tok->type != TOKEN_MINUS)
-        return parse_primary(tokens, pos);
+        return parse_call(tokens, pos);
     (*pos)++;
+    return make_unary_expr(*tok, parse_unary(tokens, pos));
+}
 
-    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
-    out->type = EXPR_UNARY;
-    out->line = tok->line;
-    out->value.unary.op = *tok;
-    out->value.unary.right = parse_unary(tokens, pos);
-    return out;
+static expr_t* parse_call(tokens_t* tokens, int* pos) {
+    expr_t* callee = parse_primary(tokens, pos);
+
+    while (get_tok(tokens, pos)->type == TOKEN_LEFT_PAREN) {
+        token_t paren = *get_tok(tokens, pos);
+        (*pos)++;
+
+        expr_list_t arguments = {0};
+        if (get_tok(tokens, pos)->type != TOKEN_RIGHT_PAREN) {
+            while (1) {
+                add_expr(&arguments, parse_assignment(tokens, pos));
+
+                token_t* separator = get_tok(tokens, pos);
+                (*pos)++;
+                if (separator->type == TOKEN_RIGHT_PAREN)
+                    break;
+                if (separator->type != TOKEN_COMMA)
+                    err(tokens, pos, "Expected comma or right parentheses");
+            }
+        } else {
+            (*pos)++;
+        }
+
+        callee = make_call_expr(callee, paren, arguments);
+    }
+
+    return callee;
 }
 
 expr_t* parse_primary(tokens_t* tokens, int* pos) {
@@ -295,22 +442,13 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
         return expr;
     }
 
-    expr_t* out = (expr_t*)malloc(sizeof(expr_t));
-    out->line = tok->line;
-    out->type = EXPR_LITERAL;
-    out->value.literal.lexeme = *tok;
+    if (tok->type == TOKEN_NUMBER)
+        return make_literal_expr(*tok, LITERAL_NUMBER);
+    if (tok->type == TOKEN_TRUE || tok->type == TOKEN_FALSE)
+        return make_literal_expr(*tok, LITERAL_BOOL);
+    if (tok->type == TOKEN_IDENTIFIER)
+        return make_variable_expr(*tok);
 
-    if (tok->type == TOKEN_NUMBER) {
-        out->value.literal.type = LITERAL_NUMBER;
-    } else if (tok->type == TOKEN_TRUE || tok->type == TOKEN_FALSE) {
-        out->value.literal.type = LITERAL_BOOL;
-    } else if (tok->type == TOKEN_IDENTIFIER) {
-        out->type = EXPR_VARIABLE;
-        out->value.variable.name = *tok;
-    } else {
-        free(out);
-        err(tokens, pos, "Expected primary (expr in parentheses, number, true, false or identifier)");
-    }
-
-    return out;
+    err(tokens, pos, "Expected primary (expr in parentheses, number, true, false or identifier)");
+    return NULL;
 }

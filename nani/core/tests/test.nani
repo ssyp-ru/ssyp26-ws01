@@ -20,3 +20,25 @@ left = right = 3;
 assert left == 3;
 assert right == 3;
 
+fn add(left, right) {
+    let result = left + right;
+    return result;
+}
+
+assert add(20, 22) == 42;
+assert add(1, 2) == 3;
+
+let base = 10;
+fn increment(value) {
+    let result = value + base;
+    return result;
+}
+
+assert increment(2) == 12;
+
+fn twice(value) {
+    return add(value, value);
+}
+
+assert twice(21) == 42;
+
