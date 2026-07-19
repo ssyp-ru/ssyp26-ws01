@@ -42,7 +42,9 @@ typedef struct {
 } pattern_t;
 
 // longer patterns should go first
+// clang-format off
 #define P(pat, kin) {.pattern = (pat), .type = (kin), .len = sizeof(pat) - 1}
+// clang-format on
 static pattern_t patterns[] = {
     P("return", TOKEN_RETURN), P("struct", TOKEN_STRUCT), P("assert", TOKEN_ASSERT), P("print", TOKEN_PRINT),
     P("while", TOKEN_WHILE),   P("false", TOKEN_FALSE),   P("true", TOKEN_TRUE),     P("else", TOKEN_ELSE),
