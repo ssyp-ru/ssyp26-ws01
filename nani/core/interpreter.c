@@ -225,10 +225,10 @@ value_t call_function(interpreter_t* interpreter, variable_list_t* locals, expr_
 value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) {
     if (expr->type == EXPR_LITERAL) {
         value_t val;
+        token_t* tok = &expr->value.literal.lexeme;
 
         switch (expr->value.literal.type) {
         case LITERAL_NUMBER: {
-            token_t* tok = &expr->value.literal.lexeme;
             char* end = (char*)tok->start + tok->length;
 
             val.type = VAL_NUMBER;
@@ -237,8 +237,19 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
         }
         case LITERAL_BOOL:
             val.type = VAL_BOOL;
-            val.val.boolean = expr->value.literal.lexeme.type == TOKEN_TRUE;
-        /* TODO(OBJ): Evaluate LITERAL_NIL and allocate OBJ_STRING for LITERAL_STRING. */
+            val.val.boolean = tok->type == TOKEN_TRUE;
+            break;
+        case LITERAL_STRING:
+            val.type = VAL_STRING;
+            string_t* str = (string_t*)malloc(sizeof(string_t));
+            val.val.string = str;
+
+            str->length = tok->length - 2;
+            str->chars = (char*)malloc(str->length + 1);
+            memcpy(str->chars, tok->start + 1, str->length);
+            str->chars[str->length] = 0;
+            break;
+        /* TODO(OBJ): Evaluate LITERAL_NIL */
         default:
             rterr(interpreter->code, expr->line, "TODO: literals");
         }
