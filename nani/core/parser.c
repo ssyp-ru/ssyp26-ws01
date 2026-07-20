@@ -529,7 +529,8 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
 
     if (tok->type == TOKEN_NUMBER)
         return make_literal_expr(*tok, LITERAL_NUMBER);
-    // TODO(OBJ): TOKEN_STRING as LITERAL_STRING
+    if (tok->type == TOKEN_STRING)
+        return make_literal_expr(*tok, LITERAL_STRING);
     if (tok->type == TOKEN_TRUE || tok->type == TOKEN_FALSE)
         return make_literal_expr(*tok, LITERAL_BOOL);
     if (tok->type == TOKEN_IDENTIFIER)
