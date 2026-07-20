@@ -6,12 +6,13 @@
 #include <stdbool.h>
 
 typedef enum {
-    TOKEN_LEFT_PAREN,
-    TOKEN_RIGHT_PAREN,
-    TOKEN_LEFT_BRACE,
-    TOKEN_RIGHT_BRACE,
+    TOKEN_LEFT_PAREN,    // '('
+    TOKEN_RIGHT_PAREN,   // ')'
+    TOKEN_LEFT_BRACE,    // '{'
+    TOKEN_RIGHT_BRACE,   // '}'
+    TOKEN_LEFT_BRACKET,  // '['
+    TOKEN_RIGHT_BRACKET, // ']'
     TOKEN_COMMA,
-    TOKEN_DOT,
     TOKEN_SEMICOLON,
     TOKEN_MINUS,
     TOKEN_PLUS,
@@ -43,8 +44,6 @@ typedef enum {
     TOKEN_OR,
     TOKEN_PRINT,
     TOKEN_RETURN,
-    TOKEN_STRUCT,
-    TOKEN_THIS,
     TOKEN_TRUE,
     TOKEN_WHILE,
 

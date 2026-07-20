@@ -237,6 +237,7 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
         case LITERAL_BOOL:
             val.type = VAL_BOOL;
             val.val.boolean = expr->value.literal.lexeme.type == TOKEN_TRUE;
+        /* TODO(OBJ): Evaluate LITERAL_NIL and allocate OBJ_STRING for LITERAL_STRING. */
         default:
             rterr(interpreter->code, expr->line, "TODO: literals");
         }
@@ -252,6 +253,12 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
         assign_variable(interpreter, locals, expr->line, expr->value.assign.name, value);
         return value;
     }
+
+    /*
+     * TODO(OBJ): Нужно обработать EXPR_KEY, для этого нужно evaluate сам объект и его ключ.
+     после этого находим по ключю значение и возвращаем (nil если не нашли)
+     Примерно тоже самое для EXPR_KEY_SET, только присваиваем его
+     */
 
     if (expr->type == EXPR_CALL)
         return call_function(interpreter, locals, expr);

@@ -19,12 +19,6 @@ typedef struct {
     int capacity;
 } stmt_list_t;
 
-typedef struct {
-    function_decl_t* items;
-    int count;
-    int capacity;
-} function_list_t;
-
 typedef enum {
     LITERAL_NIL,
     LITERAL_BOOL,
@@ -41,8 +35,8 @@ typedef enum {
     EXPR_VARIABLE,
     EXPR_ASSIGN,
     EXPR_CALL,
-    EXPR_GET,
-    EXPR_SET
+    EXPR_KEY,
+    EXPR_KEY_SET
 } expr_type_t;
 
 struct expr_t {
@@ -87,13 +81,13 @@ struct expr_t {
         } call;
         struct {
             expr_t* object;
-            token_t name;
-        } get;
+            expr_t* key;
+        } key;
         struct {
             expr_t* object;
-            token_t name;
+            expr_t* key;
             expr_t* value;
-        } set;
+        } key_set;
     } value;
 };
 
@@ -115,7 +109,6 @@ typedef enum {
     STMT_LET,
     STMT_PRINT,
     STMT_RETURN,
-    STMT_STRUCT,
     STMT_WHILE
 } stmt_type_t;
 
@@ -158,10 +151,6 @@ struct stmt_t {
             token_t keyword;
             expr_t* value;
         } return_stmt;
-        struct {
-            token_t name;
-            function_list_t methods;
-        } struct_decl;
         struct {
             expr_t* condition;
             stmt_t* body;

@@ -287,6 +287,11 @@ expr_t* parse_assignment(tokens_t* tokens, int* pos) {
     (*pos)++;
 
     expr_t* value = parse_assignment(tokens, pos);
+
+    /*
+     TODO(OBJ): Тут нужно посмотреть, если у нас EXPR_KEY то мы меняем на EXPR_KEY_SET
+     (также как с make_assign_expr)
+     */
     if (left->type != EXPR_VARIABLE)
         err(tokens, pos, "Invalid assignment target");
 
@@ -399,6 +404,11 @@ expr_t* parse_unary(tokens_t* tokens, int* pos) {
 static expr_t* parse_call(tokens_t* tokens, int* pos) {
     expr_t* callee = parse_primary(tokens, pos);
 
+    /*
+     TODO(OBJ): добавить проверку на TOKEN_LEFT_BRACKET/TOKEN_RIGHT_BRACKET, внутри
+     `[expression]` нужно ещё раз спарсить (там может быть сложное выражение).
+     Должно получится expr с типом EXPR_KEY
+     */
     while (get_tok(tokens, pos)->type == TOKEN_LEFT_PAREN) {
         token_t paren = *get_tok(tokens, pos);
         (*pos)++;
@@ -444,6 +454,7 @@ expr_t* parse_primary(tokens_t* tokens, int* pos) {
 
     if (tok->type == TOKEN_NUMBER)
         return make_literal_expr(*tok, LITERAL_NUMBER);
+    // TODO(OBJ): TOKEN_STRING as LITERAL_STRING
     if (tok->type == TOKEN_TRUE || tok->type == TOKEN_FALSE)
         return make_literal_expr(*tok, LITERAL_BOOL);
     if (tok->type == TOKEN_IDENTIFIER)

@@ -4,12 +4,16 @@
 #include "common.h"
 #include <stdbool.h>
 
-typedef struct obj_t obj_t;
+typedef struct {
+    char* chars;
+    int length;
+} string_t;
 
 typedef enum {
     VAL_NIL,
     VAL_BOOL,
     VAL_NUMBER,
+    VAL_STRING,
     VAL_OBJ
 } value_type_t;
 
@@ -18,9 +22,21 @@ typedef struct {
     union {
         int boolean;
         double number;
-        obj_t* object;
+        string_t* string;
+        struct obj_t* object;
     } val;
 } value_t;
+
+typedef struct {
+    value_t key;
+    value_t value;
+} map_entry_t;
+
+typedef struct obj_t {
+    map_entry_t* entries;
+    int count;
+    int capacity;
+} obj_t;
 
 value_t nil_value();
 bool val_equal(value_t* a, value_t* b);

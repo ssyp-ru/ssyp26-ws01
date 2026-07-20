@@ -118,6 +118,7 @@ static value_t native_readline(interpreter_t* interpreter, int line, value_t* ar
     return nil_value();
 }
 
+// TODO(OBJ): добавляем функцию object(), которая возвращает value_t с пустым VAL_OBJ.
 void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_init_window", 2, native_init_window);
     define_native_function(interpreter, "rl_window_should_close", 0, native_window_should_close);
