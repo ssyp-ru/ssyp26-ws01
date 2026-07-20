@@ -415,6 +415,19 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
 
         return 0;
     }
+    case STMT_WHILE:
+        while (true) {
+            value_t cond = eval(interpreter, locals, stmt->as.while_stmt.condition);
+            if (cond.type != VAL_BOOL)
+                rterr(interpreter->code, stmt->line, "non-bool expression in while condition");
+
+            if (!cond.val.boolean)
+                break;
+
+            execute_statement(interpreter, locals, stmt->as.while_stmt.body, return_value);
+        }
+
+        return 0;
     case STMT_BLOCK:
         for (int i = 0; i < stmt->as.block.declarations.count; i++) {
             stmt_t* s = stmt->as.block.declarations.items[i];
