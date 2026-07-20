@@ -42,3 +42,41 @@ fn twice(value) {
 
 assert twice(21) == 42;
 
+if (2 + 2 == 4) {
+    print 1;
+}
+
+if (2 + 2 == 4) {
+    print 2;
+} else {
+    assert false;
+}
+
+if (2 + 2 == 5) {
+    assert false;
+} else {
+    print 2;
+}
+
+if (2 + 2 == 5) {
+    assert false;
+}
+
+if (2 + 2 == 3) {
+    assert false;
+} else if (2 + 2 == 5) {
+    assert false;
+} else {
+    print 3;
+}
+
+if (2 + 2 == 3) {
+    assert false;
+} else if (2 + 2 == 5) {
+    assert false;
+} else if (2 + 2 == 4) {
+    print 4;
+} else {
+    assert false;
+}
+
