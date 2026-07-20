@@ -87,6 +87,15 @@ expr_t* make_assign_expr(token_t op, expr_t* variable, expr_t* value) {
     return out;
 }
 
+expr_t* make_key_set(token_t *tok, expr_t *left, expr_t *value){
+    expr_t *new = (expr_t *)malloc(sizeof(expr_t));
+    new->type = EXPR_KEY_SET;
+    new->value.key_set.object = left;
+    new->value.key_set.key = ;
+    new->value.key_set.value = ;
+    return(new);
+}
+
 static expr_t* make_unary_expr(token_t op, expr_t* right) {
     expr_t* out = (expr_t*)malloc(sizeof(expr_t));
     out->type = EXPR_UNARY;
@@ -367,6 +376,11 @@ expr_t* parse_assignment(tokens_t* tokens, int* pos) {
      TODO(OBJ): Тут нужно посмотреть, если у нас EXPR_KEY то мы меняем на EXPR_KEY_SET
      (также как с make_assign_expr)
      */
+    if(left->type == EXPR_KEY){
+        expr_t *out = make_key_set(*tok, left, value);
+        free(left);
+        return out;
+    }
     if (left->type != EXPR_VARIABLE)
         err(tokens, pos, "Invalid assignment target");
 
