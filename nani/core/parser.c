@@ -148,6 +148,7 @@ void free_ast(stmt_list_t* ast) {
 
 static void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);
 static void parse_function_declaration(stmt_t* stmt, tokens_t* tokens, int* pos);
+static void parse_if_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);
 expr_t* parse_assignment(tokens_t* tokens, int* pos);
 static expr_t* parse_or(tokens_t* tokens, int* pos);
 static expr_t* parse_and(tokens_t* tokens, int* pos);
@@ -209,6 +210,25 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
             stmt->as.return_stmt.value = NULL;
         else
             stmt->as.return_stmt.value = parse_assignment(tokens, pos);
+    } else if (tok->type == TOKEN_IF) {
+        parse_if_stmt(stmt, tokens, pos);
+        return;
+    } else if (tok->type == TOKEN_LEFT_BRACE) {
+        stmt->type = STMT_BLOCK;
+        stmt_list_t* decls = &stmt->as.block.declarations;
+
+        while (get_tok(tokens, pos)->type != TOKEN_RIGHT_BRACE) {
+            if (*pos >= tokens->length) {
+                (*pos)++;
+                err(tokens, pos, "Expected right brace at block end");
+            }
+
+            stmt_t* body_stmt = add_stmt(decls);
+            parse_stmt(body_stmt, tokens, pos);
+        }
+        (*pos)++;
+
+        return; // no semicolon
     } else {
         stmt->type = STMT_EXPRESSION;
         (*pos)--;
@@ -276,6 +296,36 @@ static void parse_function_declaration(stmt_t* stmt, tokens_t* tokens, int* pos)
         parse_stmt(body_stmt, tokens, pos);
     }
     (*pos)++;
+}
+
+void parse_if_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
+    stmt->type = STMT_IF;
+    stmt->as.if_stmt.else_branch = NULL;
+
+    token_t* tok = get_tok(tokens, pos);
+    (*pos)++;
+    if (tok->type != TOKEN_LEFT_PAREN)
+        err(tokens, pos, "Expected left parentheses");
+
+    expr_t* cond = parse_or(tokens, pos);
+    stmt->as.if_stmt.condition = cond;
+
+    tok = get_tok(tokens, pos);
+    (*pos)++;
+    if (tok->type != TOKEN_RIGHT_PAREN)
+        err(tokens, pos, "Expected right parentheses");
+
+    stmt_t* then = (stmt_t*)malloc(sizeof(stmt_t));
+    stmt->as.if_stmt.then_branch = then;
+    parse_stmt(then, tokens, pos);
+
+    if (get_tok(tokens, pos)->type != TOKEN_ELSE)
+        return;
+    (*pos)++;
+
+    stmt_t* elsee = (stmt_t*)malloc(sizeof(stmt_t));
+    stmt->as.if_stmt.else_branch = elsee;
+    parse_stmt(elsee, tokens, pos);
 }
 
 expr_t* parse_assignment(tokens_t* tokens, int* pos) {

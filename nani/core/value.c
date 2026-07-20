@@ -1,6 +1,7 @@
 #include "value.h"
 #include "c_utils/utils.h"
 
+#include <stdio.h>
 #include <assert.h>
 #include <string.h>
 
@@ -39,4 +40,28 @@ bool val_equal(value_t* a, value_t* b) {
 
     log_error("Unknown value type: %d", a->type);
     assert(0 && "internal error");
+}
+
+void print_value(value_t* val) {
+    switch (val->type) {
+    case VAL_NIL:
+        printf("nil\n");
+        break;
+
+    case VAL_BOOL:
+        printf(val->val.boolean ? "true\n" : "false\n");
+        break;
+
+    case VAL_NUMBER:
+        printf("%lf\n", val->val.number);
+        break;
+
+    case VAL_STRING:
+        printf("%s\n", val->val.string->chars);
+        break;
+
+    case VAL_OBJ:
+        // TODO(OBJ):
+        assert(false);
+    }
 }

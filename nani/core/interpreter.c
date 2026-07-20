@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include "parser.h"
 #include "value.h"
 #include "lexer.h"
 
@@ -377,6 +378,11 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
     case STMT_EXPRESSION:
         eval(interpreter, locals, stmt->as.expression.expression);
         return 0;
+    case STMT_PRINT: {
+        value_t val = eval(interpreter, locals, stmt->as.print.expression);
+        print_value(&val);
+        return 0;
+    }
     case STMT_ASSERT: {
         value_t val = eval(interpreter, locals, stmt->as.assert_stmt.expression);
         if (val.type != VAL_BOOL)
@@ -396,6 +402,26 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
         else
             *return_value = nil_value();
         return 1;
+    case STMT_IF: {
+        value_t cond = eval(interpreter, locals, stmt->as.if_stmt.condition);
+        if (cond.type != VAL_BOOL)
+            rterr(interpreter->code, stmt->line, "non-bool expression in if condition");
+
+        if (cond.val.boolean) {
+            execute_statement(interpreter, locals, stmt->as.if_stmt.then_branch, return_value);
+        } else if (stmt->as.if_stmt.else_branch) {
+            execute_statement(interpreter, locals, stmt->as.if_stmt.else_branch, return_value);
+        }
+
+        return 0;
+    }
+    case STMT_BLOCK:
+        for (int i = 0; i < stmt->as.block.declarations.count; i++) {
+            stmt_t* s = stmt->as.block.declarations.items[i];
+            execute_statement(interpreter, locals, s, return_value);
+        }
+
+        return 0;
     default:
         assert(false);
     }
