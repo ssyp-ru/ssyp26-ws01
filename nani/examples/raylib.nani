@@ -1,7 +1,9 @@
 rl_init_window(800, 450);
-rl_begin_drawing();
-rl_clear_background(30, 30, 30);
-rl_draw_circle(400, 225, 80, 255, 0, 0);
-rl_end_drawing();
-readline();
+
+while (!rl_window_should_close()) {
+    rl_begin_drawing();
+    rl_clear_background(30, 30, 30);
+    rl_draw_circle(400, 225, 80, 255, 0, 0);
+    rl_end_drawing();
+}
 rl_close_window();
