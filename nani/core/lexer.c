@@ -44,19 +44,44 @@ typedef struct {
 // longer patterns should go first
 // clang-format off
 #define P(pat, kin) {.pattern = (pat), .type = (kin), .len = sizeof(pat) - 1}
-// clang-format on
 static pattern_t patterns[] = {
-    P("return", TOKEN_RETURN), P("struct", TOKEN_STRUCT), P("assert", TOKEN_ASSERT), P("print", TOKEN_PRINT),
-    P("while", TOKEN_WHILE),   P("false", TOKEN_FALSE),   P("true", TOKEN_TRUE),     P("else", TOKEN_ELSE),
-    P("this", TOKEN_THIS),     P("and", TOKEN_AND),       P("for", TOKEN_FOR),       P("let", TOKEN_LET),
-    P("nil", TOKEN_NIL),       P("fn", TOKEN_FN),         P("if", TOKEN_IF),         P("or", TOKEN_OR),
-    P("==", TOKEN_EQ_EQ),      P("!=", TOKEN_BANG_EQ),    P("<=", TOKEN_LESS_EQ),    P(">=", TOKEN_GREATER_EQ),
-    P("(", TOKEN_LEFT_PAREN),  P(")", TOKEN_RIGHT_PAREN), P("{", TOKEN_LEFT_BRACE),  P("}", TOKEN_RIGHT_BRACE),
-    P(",", TOKEN_COMMA),       P(".", TOKEN_DOT),         P(";", TOKEN_SEMICOLON),   P("+", TOKEN_PLUS),
-    P("-", TOKEN_MINUS),       P("*", TOKEN_STAR),        P("/", TOKEN_SLASH),       P("!", TOKEN_BANG),
-    P("=", TOKEN_EQ),          P("<", TOKEN_LESS),        P(">", TOKEN_GREATER),
+    P("return", TOKEN_RETURN),
+    P("assert", TOKEN_ASSERT),
+    P("print", TOKEN_PRINT),
+    P("while", TOKEN_WHILE),
+    P("false", TOKEN_FALSE),
+    P("true", TOKEN_TRUE),
+    P("else", TOKEN_ELSE),
+    P("and", TOKEN_AND),
+    P("for", TOKEN_FOR),
+    P("let", TOKEN_LET),
+    P("nil", TOKEN_NIL),
+    P("fn", TOKEN_FN),
+    P("if", TOKEN_IF),
+    P("or", TOKEN_OR),
+    P("==", TOKEN_EQ_EQ),
+    P("!=", TOKEN_BANG_EQ),
+    P("<=", TOKEN_LESS_EQ),
+    P(">=", TOKEN_GREATER_EQ),
+    P("(", TOKEN_LEFT_PAREN),
+    P(")", TOKEN_RIGHT_PAREN),
+    P("{", TOKEN_LEFT_BRACE),
+    P("}", TOKEN_RIGHT_BRACE),
+    P("[", TOKEN_LEFT_BRACKET),
+    P("]", TOKEN_RIGHT_BRACKET),
+    P(",", TOKEN_COMMA),
+    P(";", TOKEN_SEMICOLON),
+    P("+", TOKEN_PLUS),
+    P("-", TOKEN_MINUS),
+    P("*", TOKEN_STAR),
+    P("/", TOKEN_SLASH),
+    P("!", TOKEN_BANG),
+    P("=", TOKEN_EQ),
+    P("<", TOKEN_LESS),
+    P(">", TOKEN_GREATER),
 };
 #undef P
+// clang-format on
 
 const char* token_kind_name(token_kind_t type) {
     switch (type) {
@@ -70,8 +95,6 @@ const char* token_kind_name(token_kind_t type) {
         return "RIGHT_BRACE";
     case TOKEN_COMMA:
         return "COMMA";
-    case TOKEN_DOT:
-        return "DOT";
     case TOKEN_SEMICOLON:
         return "SEMICOLON";
     case TOKEN_MINUS:
@@ -128,10 +151,6 @@ const char* token_kind_name(token_kind_t type) {
         return "PRINT";
     case TOKEN_RETURN:
         return "RETURN";
-    case TOKEN_STRUCT:
-        return "STRUCT";
-    case TOKEN_THIS:
-        return "THIS";
     case TOKEN_TRUE:
         return "TRUE";
     case TOKEN_WHILE:

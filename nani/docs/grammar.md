@@ -7,8 +7,7 @@ What Nani has:
 - variables declared with `let`, block scope, and assignment
 - `if`, `while`, and `for`
 - functions declared with `fn`; functions do **not** form closures
-- structs with fields, methods, `this`, and optional `init` initializers
-- no struct inheritance and no `super`
+- maps created with the built-in `object()` function and accessed with value keys
 - statements `print` and `assert`
 - `//` line comments
 
@@ -24,10 +23,10 @@ STRING_CHAR     → any character except '"' or a newline
 ```
 
 Keywords: `and`, `assert`, `else`, `false`, `fn`, `for`, `if`, `let`,
-`nil`, `or`, `print`, `return`, `struct`, `this`, `true`, `while`.
+`nil`, `or`, `print`, `return`, `true`, `while`.
 
 ```
-"(" ")" "{" "}" "," "." ";"
+"(" ")" "{" "}" "[" "]" "," ";"
 "+" "-" "*" "/"
 "!" "!="
 "=" "=="
@@ -47,20 +46,16 @@ comments separate tokens and otherwise have no meaning.
 6: `+ -` (binary)
 7: `* /`
 8: `! -` (unary)
-9: calls, property access: `()` `.`
+9: calls and keyed access: `()` `[]`
 
 ## Syntax grammar
 
 ```
 program        → declaration* EOF ;
 
-declaration    → structDecl
-               | fnDecl
+declaration    → fnDecl
                | letDecl
                | statement ;
-
-structDecl     → "struct" IDENTIFIER "{" method* "}" ;
-method         → IDENTIFIER "(" parameters? ")" block ;
 
 fnDecl         → "fn" function ;
 function       → IDENTIFIER "(" parameters? ")" block ;
@@ -103,7 +98,8 @@ factor         → unary      ( ( "*" | "/" ) unary )* ;
 unary          → ( "!" | "-" ) unary
                | call ;
 
-call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+call           → primary ( "(" arguments? ")"
+                         | "[" expression "]" )* ;
 arguments      → expression ( "," expression )* ;
 
 primary        → "false"
@@ -112,6 +108,9 @@ primary        → "false"
                | NUMBER
                | STRING
                | IDENTIFIER
-               | "this"
                | "(" expression ")" ;
 ```
+
+The left-hand side of an assignment must be an identifier or keyed access.
+`object()` creates an empty map. A map key is any non-`nil` value; reading a
+missing map key evaluates to `nil`.

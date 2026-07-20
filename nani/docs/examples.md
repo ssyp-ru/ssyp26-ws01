@@ -118,37 +118,34 @@ fn showItem(number) {
 showItem("7");
 ```
 
-## Structs, fields, and methods
+## Objects (maps)
+
+`object()` creates an empty map. Bracket access evaluates its key expression,
+so keys are values rather than fixed field names. A missing key evaluates to
+`nil`; `nil` itself cannot be used as a key.
 
 ```
-struct Point {
-  init(x, y) {
-    this.x = x;
-    this.y = y;
-  }
+let a = object();
 
-  move(dx, dy) {
-    this.x = this.x + dx;
-    this.y = this.y + dy;
-  }
+a["x"] = 10;
+a[42] = "number key";
+a[true] = "boolean key";
 
-  lengthSquared() {
-    return this.x * this.x + this.y * this.y;
-  }
-}
-
-let point = Point(2, 3);
-point.move(1, -1);
-print point.x;               // 3
-print point.lengthSquared(); // 13
+print a["x"]; // 10
+print a[42];  // number key
+print a["missing"]; // nil
 ```
 
-Fields may also be added after an instance is created:
+Keys may be computed at runtime, and maps are reference values:
 
 ```
-struct Box {}
+let a = object();
+let key = "answer";
+a[key] = 42;
 
-let box = Box();
-box.value = "stored value";
-print box.value;
+let b = a;
+b["shared"] = true;
+
+assert a["answer"] == 42;
+assert a["shared"] == true;
 ```
