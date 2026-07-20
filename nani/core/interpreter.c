@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include "parser.h"
 #include "value.h"
 #include "lexer.h"
 #include "c_utils/utils.h"
@@ -248,10 +249,10 @@ void add_to_object(int *count, int *capacity, map_entry_t *list, value_t key, va
 value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) {
     if (expr->type == EXPR_LITERAL) {
         value_t val;
+        token_t* tok = &expr->value.literal.lexeme;
 
         switch (expr->value.literal.type) {
         case LITERAL_NUMBER: {
-            token_t* tok = &expr->value.literal.lexeme;
             char* end = (char*)tok->start + tok->length;
 
             val.type = VAL_NUMBER;
@@ -260,9 +261,19 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
         }
         case LITERAL_BOOL:
             val.type = VAL_BOOL;
-            val.val.boolean = expr->value.literal.lexeme.type == TOKEN_TRUE;
-        /* TODO(OBJ): Evaluate LITERAL_NIL and allocate OBJ_STRING for LITERAL_STRING. */
+            val.val.boolean = tok->type == TOKEN_TRUE;
+            break;
+        case LITERAL_STRING:
+            val.type = VAL_STRING;
+            string_t* str = (string_t*)malloc(sizeof(string_t));
+            val.val.string = str;
 
+            str->length = tok->length - 2;
+            str->chars = (char*)malloc(str->length + 1);
+            memcpy(str->chars, tok->start + 1, str->length);
+            str->chars[str->length] = 0;
+            break;
+        /* TODO(OBJ): Evaluate LITERAL_NIL */
         default:
             rterr(interpreter->code, expr->line, "TODO: literals");
         }
@@ -428,6 +439,11 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
     case STMT_EXPRESSION:
         eval(interpreter, locals, stmt->as.expression.expression);
         return 0;
+    case STMT_PRINT: {
+        value_t val = eval(interpreter, locals, stmt->as.print.expression);
+        print_value(&val);
+        return 0;
+    }
     case STMT_ASSERT: {
         value_t val = eval(interpreter, locals, stmt->as.assert_stmt.expression);
         if (val.type != VAL_BOOL)
@@ -447,6 +463,39 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
         else
             *return_value = nil_value();
         return 1;
+    case STMT_IF: {
+        value_t cond = eval(interpreter, locals, stmt->as.if_stmt.condition);
+        if (cond.type != VAL_BOOL)
+            rterr(interpreter->code, stmt->line, "non-bool expression in if condition");
+
+        if (cond.val.boolean) {
+            execute_statement(interpreter, locals, stmt->as.if_stmt.then_branch, return_value);
+        } else if (stmt->as.if_stmt.else_branch) {
+            execute_statement(interpreter, locals, stmt->as.if_stmt.else_branch, return_value);
+        }
+
+        return 0;
+    }
+    case STMT_WHILE:
+        while (true) {
+            value_t cond = eval(interpreter, locals, stmt->as.while_stmt.condition);
+            if (cond.type != VAL_BOOL)
+                rterr(interpreter->code, stmt->line, "non-bool expression in while condition");
+
+            if (!cond.val.boolean)
+                break;
+
+            execute_statement(interpreter, locals, stmt->as.while_stmt.body, return_value);
+        }
+
+        return 0;
+    case STMT_BLOCK:
+        for (int i = 0; i < stmt->as.block.declarations.count; i++) {
+            stmt_t* s = stmt->as.block.declarations.items[i];
+            execute_statement(interpreter, locals, s, return_value);
+        }
+
+        return 0;
     default:
         log_error("unknown statement type: %d", stmt->type);
         assert(false);
