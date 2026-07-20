@@ -1,6 +1,7 @@
 #include "interpreter.h"
 #include "value.h"
 #include "lexer.h"
+#include "c_utils/utils.h"
 
 #include <stdbool.h>
 #include <assert.h>
@@ -221,6 +222,29 @@ value_t call_function(interpreter_t* interpreter, variable_list_t* locals, expr_
     return return_value;
 }
 
+void add_to_object(int *count, int *capacity, map_entry_t *list, value_t key, value_t value){
+    for(int i = 0; i < *count; i++){
+        if(val_equal(&list[i].key, &key)){
+            list[i].value = value;
+            return;
+        }
+    }
+    if(*count == *capacity){
+        map_entry_t *list_new = (map_entry_t *)malloc(2 * *capacity * sizeof(map_entry_t));
+        int capacity2 = 2 * *capacity;
+        capacity = &capacity2;
+        for(int i = 0; i < *count; i++){
+            list_new[i] = list[i];
+        }
+        free(list);
+        list = list_new;
+    }        
+    list[*count].key = key;
+    list[*count].value = value;
+    int count2 = *count + 1;
+    count = &count2;
+}
+   
 value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) {
     if (expr->type == EXPR_LITERAL) {
         value_t val;
@@ -238,6 +262,7 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
             val.type = VAL_BOOL;
             val.val.boolean = expr->value.literal.lexeme.type == TOKEN_TRUE;
         /* TODO(OBJ): Evaluate LITERAL_NIL and allocate OBJ_STRING for LITERAL_STRING. */
+
         default:
             rterr(interpreter->code, expr->line, "TODO: literals");
         }
@@ -259,6 +284,32 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
      после этого находим по ключю значение и возвращаем (nil если не нашли)
      Примерно тоже самое для EXPR_KEY_SET, только присваиваем его
      */
+
+    if(expr->type == EXPR_KEY){ // ?
+        value_t key = eval(interpreter, locals, expr->value.key.key);
+        value_t object = eval(interpreter, locals, expr->value.key.object);
+        int count = object.val.object->count;
+        map_entry_t *list = object.val.object->entries;
+        for(int i = 0; i < count; i++){
+            if(val_equal(&list[i].key, &key)){
+                return list[i].value;
+            }
+        }
+        value_t value;
+        value.type = VAL_NIL;
+        return value;
+        // error?
+    }
+    if(expr->type == EXPR_KEY_SET){
+        value_t key = eval(interpreter, locals, expr->value.key_set.key);
+        value_t object = eval(interpreter, locals, expr->value.key_set.object);
+        value_t value = eval(interpreter, locals, expr->value.key_set.value);
+        int count = object.val.object->count;
+        map_entry_t *list = object.val.object->entries;
+        int capacity = object.val.object->capacity;
+        add_to_object(&count, &capacity, list, key, value);
+        //return ???
+    }
 
     if (expr->type == EXPR_CALL)
         return call_function(interpreter, locals, expr);
@@ -397,6 +448,7 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
             *return_value = nil_value();
         return 1;
     default:
+        log_error("unknown statement type: %d", stmt->type);
         assert(false);
     }
 }

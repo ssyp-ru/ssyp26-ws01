@@ -409,6 +409,21 @@ static expr_t* parse_call(tokens_t* tokens, int* pos) {
      `[expression]` нужно ещё раз спарсить (там может быть сложное выражение).
      Должно получится expr с типом EXPR_KEY
      */
+
+    if(get_tok(tokens, pos)->type == TOKEN_LEFT_BRACKET){ // ?
+        (*pos)++;
+        expr_t *key = parse_assignment(tokens, pos);
+        expr_t *expr = (expr_t *)malloc(sizeof(expr_t));
+        expr->type = EXPR_KEY;
+        expr->value.key.key = key;
+        expr->value.key.object = callee;
+        if(get_tok(tokens, pos)->type == TOKEN_RIGHT_BRACKET){
+            (*pos)++;
+            return expr;
+        }
+        // error?
+    }
+
     while (get_tok(tokens, pos)->type == TOKEN_LEFT_PAREN) {
         token_t paren = *get_tok(tokens, pos);
         (*pos)++;

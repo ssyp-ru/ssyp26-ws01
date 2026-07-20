@@ -3,6 +3,7 @@
 #include <raylib/src/raylib.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 static double number_argument(interpreter_t* interpreter, int line, value_t* arguments, int index) {
     if (arguments[index].type != VAL_NUMBER)
@@ -118,6 +119,16 @@ static value_t native_readline(interpreter_t* interpreter, int line, value_t* ar
     return nil_value();
 }
 
+value_t native_object(){ // ?
+    value_t value;
+    value.type = VAL_OBJ;
+    value.val.object = (obj_t *)malloc(sizeof(obj_t));
+    value.val.object->entries = (map_entry_t *)malloc(4 * sizeof(map_entry_t));
+    value.val.object->count = 0;
+    value.val.object->capacity = 4;
+    return value;
+}
+
 // TODO(OBJ): добавляем функцию object(), которая возвращает value_t с пустым VAL_OBJ.
 void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_init_window", 2, native_init_window);
@@ -130,4 +141,6 @@ void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_wait_time", 1, native_wait_time);
     define_native_function(interpreter, "rl_close_window", 0, native_close_window);
     define_native_function(interpreter, "readline", 0, native_readline);
+
+    define_native_function(interpreter, "object", 0, native_object);
 }
