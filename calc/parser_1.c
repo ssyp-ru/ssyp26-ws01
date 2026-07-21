@@ -104,6 +104,9 @@ void print_ast(expr_t *expr){
                     case TOKEN_MULTIPLY:
                         c = '*';
                         break;
+                    case TOKEN_DIVIDE:
+                        c = '/';
+                        break;
                     default:
                         c = ' ';
                 }
@@ -177,12 +180,13 @@ expr_t *p_factor(lexer_t *list, expr_t *left){ // ?
 }
 
 expr_t *p_unary(lexer_t *list){ // ?
-    token_t t = get_token(list);
+    token_t t = peek_token(list);
     if(t.t == TOKEN_NUMBER){
+        get_token(list);
         int n = parse_number(list, t);
 //        printf("Number: %d\n", n);
         return make_literal_number(n);
     }
-    printf("not_number\n");
+//    printf("not_number\n");
     return 0;
 }
