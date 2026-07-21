@@ -91,3 +91,7 @@ assert "abc" == "abc";
 assert "abc" != "bcd";
 assert "abc" != "abcd";
 
+for (let i = 0; i < 10; i = i + 1) {
+    print i;
+}
+

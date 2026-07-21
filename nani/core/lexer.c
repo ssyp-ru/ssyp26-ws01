@@ -195,6 +195,9 @@ bool tokenize(tokens_t* tokens, const char* code) {
             }
         }
 
+        if (parsed)
+            continue;
+
         // special cases
         char c = code[i];
         if (is_digit(c)) { // number
@@ -250,9 +253,6 @@ bool tokenize(tokens_t* tokens, const char* code) {
             i++;
             continue;
         }
-
-        if (parsed)
-            continue;
 
         log_error("Invalid char on line %d: '%c'\n", line, c);
         return false;

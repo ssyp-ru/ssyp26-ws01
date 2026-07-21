@@ -246,10 +246,12 @@ void free_ast(stmt_list_t* ast) {
     free(ast->items);
 }
 
+static bool parse_stmt_nosemi(stmt_t* stmt, tokens_t* tokens, int* pos);
 static void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);
 static void parse_function_declaration(stmt_t* stmt, tokens_t* tokens, int* pos);
 static void parse_if_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);
 static void parse_while_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);
+static void parse_for_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);
 expr_t* parse_assignment(tokens_t* tokens, int* pos);
 static expr_t* parse_or(tokens_t* tokens, int* pos);
 static expr_t* parse_and(tokens_t* tokens, int* pos);
@@ -272,8 +274,8 @@ void parse_program(stmt_list_t* ast, tokens_t* tokens) {
     }
 }
 
-void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
-    log_debug("parse_stmt: pos=%d", *pos);
+bool parse_stmt_nosemi(stmt_t* stmt, tokens_t* tokens, int* pos) {
+    log_debug("parse_stmt_nosemi: pos=%d", *pos);
     log_token("  cur token", get_tok(tokens, pos));
     token_t* tok = get_tok(tokens, pos);
     (*pos)++;
@@ -282,7 +284,7 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
 
     if (tok->type == TOKEN_FN) {
         parse_function_declaration(stmt, tokens, pos);
-        return;
+        return false;
     } else if (tok->type == TOKEN_LET) {
         stmt->type = STMT_LET;
 
@@ -313,10 +315,13 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
             stmt->as.return_stmt.value = parse_assignment(tokens, pos);
     } else if (tok->type == TOKEN_IF) {
         parse_if_stmt(stmt, tokens, pos);
-        return;
+        return false;
     } else if (tok->type == TOKEN_WHILE) {
         parse_while_stmt(stmt, tokens, pos);
-        return;
+        return false;
+    } else if (tok->type == TOKEN_FOR) {
+        parse_for_stmt(stmt, tokens, pos);
+        return false;
     } else if (tok->type == TOKEN_LEFT_BRACE) {
         stmt->type = STMT_BLOCK;
         stmt_list_t* decls = &stmt->as.block.declarations;
@@ -332,14 +337,25 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
         }
         (*pos)++;
 
-        return; // no semicolon
+        return false; // no semicolon
     } else {
         stmt->type = STMT_EXPRESSION;
         (*pos)--;
         stmt->as.expression.expression = parse_assignment(tokens, pos);
     }
 
-    tok = get_tok(tokens, pos);
+    return true;
+}
+
+void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
+    log_debug("parse_stmt: pos=%d", *pos);
+    log_token("  cur token", get_tok(tokens, pos));
+
+    bool semi = parse_stmt_nosemi(stmt, tokens, pos);
+    if (!semi)
+        return;
+
+    token_t* tok = get_tok(tokens, pos);
     (*pos)++;
     if (tok->type != TOKEN_SEMICOLON)
         err(tokens, pos, "Expected semicolon");
@@ -411,7 +427,7 @@ void parse_if_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
     if (tok->type != TOKEN_LEFT_PAREN)
         err(tokens, pos, "Expected left parentheses");
 
-    expr_t* cond = parse_or(tokens, pos);
+    expr_t* cond = parse_assignment(tokens, pos);
     stmt->as.if_stmt.condition = cond;
 
     tok = get_tok(tokens, pos);
@@ -442,7 +458,7 @@ void parse_while_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
     if (tok->type != TOKEN_LEFT_PAREN)
         err(tokens, pos, "Expected left parentheses");
 
-    expr_t* cond = parse_or(tokens, pos);
+    expr_t* cond = parse_assignment(tokens, pos);
     stmt->as.while_stmt.condition = cond;
 
     tok = get_tok(tokens, pos);
@@ -453,6 +469,44 @@ void parse_while_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
     stmt_t* body = (stmt_t*)malloc(sizeof(stmt_t));
     memset(body, 0, sizeof(stmt_t));
     stmt->as.while_stmt.body = body;
+    parse_stmt(body, tokens, pos);
+}
+
+void parse_for_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
+    stmt->type = STMT_FOR;
+
+    token_t* tok = get_tok(tokens, pos);
+    (*pos)++;
+    if (tok->type != TOKEN_LEFT_PAREN)
+        err(tokens, pos, "Expected left parentheses");
+
+    stmt_t* init = (stmt_t*)malloc(sizeof(stmt_t));
+    memset(init, 0, sizeof(stmt_t));
+    parse_stmt_nosemi(init, tokens, pos);
+    stmt->as.for_stmt.initializer = init;
+
+    tok = get_tok(tokens, pos);
+    (*pos)++;
+    if (tok->type != TOKEN_SEMICOLON)
+        err(tokens, pos, "Expected semicolon");
+
+    stmt->as.for_stmt.condition = parse_assignment(tokens, pos);
+
+    tok = get_tok(tokens, pos);
+    (*pos)++;
+    if (tok->type != TOKEN_SEMICOLON)
+        err(tokens, pos, "Expected semicolon");
+
+    stmt->as.for_stmt.increment = parse_assignment(tokens, pos);
+
+    tok = get_tok(tokens, pos);
+    (*pos)++;
+    if (tok->type != TOKEN_RIGHT_PAREN)
+        err(tokens, pos, "Expected right parentheses");
+
+    stmt_t* body = (stmt_t*)malloc(sizeof(stmt_t));
+    memset(body, 0, sizeof(stmt_t));
+    stmt->as.for_stmt.body = body;
     parse_stmt(body, tokens, pos);
 }
 
