@@ -66,7 +66,7 @@ void print_value(value_t* val) {
         printf("print_object:\n");
         printf("count = %d\n", val->val.object->count);
         printf("capacity = %d\n", val->val.object->capacity);
-        for(int i = 0; i < val->val.object->count; i++){
+        for (int i = 0; i < val->val.object->count; i++) {
             printf("key: ");
             print_value(&val->val.object->entries[i].key);
             printf("value: ");
