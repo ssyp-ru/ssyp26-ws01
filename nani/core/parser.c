@@ -50,6 +50,7 @@ static stmt_t* add_stmt(stmt_list_t* ast) {
     }
 
     stmt_t* stmt = (stmt_t*)malloc(sizeof(stmt_t));
+    memset(stmt, 0, sizeof(stmt_t));
     ast->items[ast->count++] = stmt;
     return stmt;
 }
@@ -220,7 +221,6 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
     } else if (tok->type == TOKEN_LEFT_BRACE) {
         stmt->type = STMT_BLOCK;
         stmt_list_t* decls = &stmt->as.block.declarations;
-        decls->items = NULL;
 
         while (get_tok(tokens, pos)->type != TOKEN_RIGHT_BRACE) {
             if (*pos >= tokens->length) {
@@ -321,6 +321,7 @@ void parse_if_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
         err(tokens, pos, "Expected right parentheses");
 
     stmt_t* then = (stmt_t*)malloc(sizeof(stmt_t));
+    memset(then, 0, sizeof(stmt_t));
     stmt->as.if_stmt.then_branch = then;
     parse_stmt(then, tokens, pos);
 
@@ -329,6 +330,7 @@ void parse_if_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
     (*pos)++;
 
     stmt_t* elsee = (stmt_t*)malloc(sizeof(stmt_t));
+    memset(elsee, 0, sizeof(stmt_t));
     stmt->as.if_stmt.else_branch = elsee;
     parse_stmt(elsee, tokens, pos);
 }
@@ -350,6 +352,7 @@ void parse_while_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
         err(tokens, pos, "Expected right parentheses");
 
     stmt_t* body = (stmt_t*)malloc(sizeof(stmt_t));
+    memset(body, 0, sizeof(stmt_t));
     stmt->as.while_stmt.body = body;
     parse_stmt(body, tokens, pos);
 }
