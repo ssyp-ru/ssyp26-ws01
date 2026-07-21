@@ -107,3 +107,25 @@ for (let i = 0; i < 10; i = i + 1) {
     print i;
 }
 
+let obj_1 = object();
+obj_1["blahblah"] = 123;
+obj_1[600] = 333;
+obj_1[444] = "aaaaa";
+obj_1["ggggg"] = "ffffff";
+
+let obj_2 = object();
+obj_2["blahblah"] = 123;
+obj_2[600] = 333;
+obj_2[444] = "aaaaa";
+obj_2["ggggg"] = "ffffff";
+
+let obj_3 = object();
+obj_3["blahblah"] = 123;
+obj_3[600] = 333;
+obj_3["extra_entry"] = 1;
+obj_3[444] = "aaaaa";
+obj_3["ggggg"] = "ffffff";
+
+assert obj_1 == obj_2;
+assert obj_1 != obj_3;
+

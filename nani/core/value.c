@@ -12,9 +12,33 @@ value_t nil_value() {
     return value;
 }
 
+static int obj_find(obj_t* obj, value_t* key) {
+    for (int i = 0; i < obj->count; i++) {
+        map_entry_t* entry = &obj->entries[i];
+
+        if (val_equal(&entry->key, key))
+            return i;
+    }
+
+    return -1;
+}
+
 static bool obj_equal(obj_t* a, obj_t* b) {
-    // TODO(OBJ):
-    assert(false);
+    if (a->count != b->count)
+        return false;
+
+    for (int i = 0; i < a->count; i++) {
+        map_entry_t* entry_a = &a->entries[i];
+
+        int idx_b = obj_find(b, &entry_a->key);
+        if (idx_b == -1)
+            return false;
+
+        if (!val_equal(&entry_a->value, &b->entries[idx_b].value))
+            return false;
+    }
+
+    return true;
 }
 
 bool val_equal(value_t* a, value_t* b) {
