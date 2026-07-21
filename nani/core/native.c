@@ -101,6 +101,7 @@ static value_t native_draw_line(interpreter_t* interpreter, int line, value_t* a
     DrawLine(start_pos_x, start_pos_y, end_pos_x, end_pos_y, color_arguments(interpreter, line, arguments, 4));
     return nil_value();
 }
+
 static value_t native_end_drawing(interpreter_t* interpreter, int line, value_t* arguments, int count) {
     (void)interpreter;
     (void)line;
@@ -123,6 +124,15 @@ static value_t native_close_window(interpreter_t* interpreter, int line, value_t
     (void)count;
     CloseWindow();
     return nil_value();
+}
+
+static value_t native_is_key_pressed(interpreter_t* interpreter, int line, value_t* arguments, int count) {
+    int key = (int)number_argument(interpreter, line, arguments, 0);
+
+    value_t value;
+    value.type = VAL_BOOL;
+    value.val.boolean = IsKeyPressed(key);
+    return value;
 }
 
 static value_t native_readline(interpreter_t* interpreter, int line, value_t* arguments, int count) {
@@ -161,6 +171,7 @@ void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_end_drawing", 0, native_end_drawing);
     define_native_function(interpreter, "rl_wait_time", 1, native_wait_time);
     define_native_function(interpreter, "rl_close_window", 0, native_close_window);
+    define_native_function(interpreter, "rl_is_key_pressed", 1, native_is_key_pressed);
     define_native_function(interpreter, "readline", 0, native_readline);
 
     define_native_function(interpreter, "object", 0, native_object);
