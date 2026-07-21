@@ -15,7 +15,7 @@ void test(){    //OK
 }
 
 void test2(){
-    char *s = "3+2*5";
+    char *s = "3+2+5";
     printf("%s\n", s);
     array_t a = tokenizer(s);
     print_array(&a, s);

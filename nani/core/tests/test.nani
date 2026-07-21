@@ -91,6 +91,18 @@ assert "abc" == "abc";
 assert "abc" != "bcd";
 assert "abc" != "abcd";
 
+let a = object();
+a[10] = 2;
+a[0] = "hello";
+a[1] = "world";
+a[2] = 0;
+a[3] = 1;
+let b = object();
+b["a"] = 3;
+b[1] = "a";
+assert a[10] == 2;
+assert b["a"] == 3;
+
 for (let i = 0; i < 10; i = i + 1) {
     print i;
 }
