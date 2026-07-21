@@ -63,8 +63,8 @@ expr_t *make_logical(token_type op, expr_t *left, expr_t *right);
 void free_expr(expr_t *expr);
 
 expr_t *p_expr(lexer_t *list);
-expr_t *p_term(lexer_t *list);
-expr_t *p_factor(lexer_t *list);
+expr_t *p_term(lexer_t *list, expr_t *left);
+expr_t *p_factor(lexer_t *list, expr_t *left);
 expr_t *p_unary(lexer_t *list);
 
 void print_ast(expr_t *expr);

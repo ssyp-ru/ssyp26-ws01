@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 struct variable_t {
     char* name;
@@ -223,27 +224,24 @@ value_t call_function(interpreter_t* interpreter, variable_list_t* locals, expr_
     return return_value;
 }
 
-void add_to_object(int *count, int *capacity, map_entry_t *list, value_t key, value_t value){
-    for(int i = 0; i < *count; i++){
-        if(val_equal(&list[i].key, &key)){
-            list[i].value = value;
+void add_to_object(value_t *object, value_t key, value_t value){
+    for(int i = 0; i < object->val.object->count; i++){
+        if(val_equal(&((object->val.object->entries)[i].key), &key)){
+            (object->val.object->entries)[i].value = value;
             return;
         }
     }
-    if(*count == *capacity){
-        map_entry_t *list_new = (map_entry_t *)malloc(2 * *capacity * sizeof(map_entry_t));
-        int capacity2 = 2 * *capacity;
-        capacity = &capacity2;
-        for(int i = 0; i < *count; i++){
-            list_new[i] = list[i];
+    if(object->val.object->count == object->val.object->capacity){
+        map_entry_t *list_new = (map_entry_t *)malloc(2 * object->val.object->capacity * sizeof(map_entry_t));
+        object->val.object->capacity *= 2;
+        for(int i = 0; i < object->val.object->count; i++){
+            list_new[i] = (object->val.object->entries)[i];
         }
-        free(list);
-        list = list_new;
+        object->val.object->entries = list_new;
     }        
-    list[*count].key = key;
-    list[*count].value = value;
-    int count2 = *count + 1;
-    count = &count2;
+    ((object->val.object->entries)[object->val.object->count]).key = key;
+    ((object->val.object->entries)[object->val.object->count]).value = value;
+    (object->val.object->count)++;
 }
    
 value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) {
@@ -315,11 +313,13 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
         value_t key = eval(interpreter, locals, expr->value.key_set.key);
         value_t object = eval(interpreter, locals, expr->value.key_set.object);
         value_t value = eval(interpreter, locals, expr->value.key_set.value);
-        int count = object.val.object->count;
-        map_entry_t *list = object.val.object->entries;
-        int capacity = object.val.object->capacity;
-        add_to_object(&count, &capacity, list, key, value);
-        //return ???
+//        log_info("expr key set:");
+//        print_value(&key);
+//        print_value(&value);
+//        print_value(&object);
+        add_to_object(&object, key, value);
+//        print_value(&object);
+        return value;
     }
 
     if (expr->type == EXPR_CALL)
@@ -418,6 +418,7 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
         return val;
     }
 
+    log_error("unknown expression type %d", expr->type);
     rterr(interpreter->code, expr->line, "TODO: other expr types");
 }
 

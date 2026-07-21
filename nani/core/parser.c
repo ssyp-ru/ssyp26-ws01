@@ -90,9 +90,9 @@ expr_t* make_assign_expr(token_t op, expr_t* variable, expr_t* value) {
 expr_t* make_key_set(token_t *tok, expr_t *left, expr_t *value){
     expr_t *new = (expr_t *)malloc(sizeof(expr_t));
     new->type = EXPR_KEY_SET;
-    new->value.key_set.object = left;
-    new->value.key_set.key = ;
-    new->value.key_set.value = ;
+    new->value.key_set.object = left->value.key.object;
+    new->value.key_set.key = left->value.key.key;
+    new->value.key_set.value = value;
     return(new);
 }
 
@@ -377,7 +377,7 @@ expr_t* parse_assignment(tokens_t* tokens, int* pos) {
      (также как с make_assign_expr)
      */
     if(left->type == EXPR_KEY){
-        expr_t *out = make_key_set(*tok, left, value);
+        expr_t *out = make_key_set(tok, left, value);
         free(left);
         return out;
     }
