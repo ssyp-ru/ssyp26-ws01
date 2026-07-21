@@ -132,16 +132,23 @@ expr_t *p_unary(lexer_t *list);
 
 expr_t *p_expr(lexer_t *list){ // OK
 //    printf("expr_OK\n");
-    return p_term(list);
+    expr_t *left = 0;
+    while(list->current < list->token_list.size){
+        left = p_term(list, left);
+    }
+    return left;
 }
 
-expr_t *p_term(lexer_t *list){ // ?
-    expr_t *l = p_factor(list);
+expr_t *p_term(lexer_t *list, expr_t *left){ // ?
+    expr_t *l = p_factor(list, 0);
+    if(left){
+        l = left;
+    }
     token_t next = peek_token(list);
     if(next.t == TOKEN_PLUS || next.t == TOKEN_MINUS){
         get_token(list);
 //        get_token(list); // ???
-        expr_t *r = p_factor(list);
+        expr_t *r = p_factor(list, 0);
 //        printf("term_OK\n");
         return make_binary(next, l, r);
     }
@@ -151,8 +158,11 @@ expr_t *p_term(lexer_t *list){ // ?
     }
 }
 
-expr_t *p_factor(lexer_t *list){ // ?
+expr_t *p_factor(lexer_t *list, expr_t *left){ // ?
     expr_t *l = p_unary(list);
+    if(left){
+        l = left;
+    }
     token_t next = peek_token(list);
     if(next.t == TOKEN_MULTIPLY || next.t == TOKEN_DIVIDE){
         get_token(list);

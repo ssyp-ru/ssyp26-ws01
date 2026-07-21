@@ -93,6 +93,10 @@ const char* token_kind_name(token_kind_t type) {
         return "LEFT_BRACE";
     case TOKEN_RIGHT_BRACE:
         return "RIGHT_BRACE";
+    case TOKEN_LEFT_BRACKET:
+        return "TOKEN_LEFT_BRACKET";
+    case TOKEN_RIGHT_BRACKET:
+        return "TOKEN_RIGHT_BRACKET";
     case TOKEN_COMMA:
         return "COMMA";
     case TOKEN_SEMICOLON:
