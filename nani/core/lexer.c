@@ -177,11 +177,15 @@ void log_tokens(const tokens_t* tokens) {
 bool tokenize(tokens_t* tokens, const char* code) {
     int i = 0;
     int line = 1;
+    int codelen = strlen(code);
 
     while (code[i]) {
         bool parsed = false;
         for (int pi = 0; pi < sizeof(patterns) / sizeof(pattern_t); pi++) {
             pattern_t* pat = &patterns[pi];
+
+            if (i + pat->len >= codelen)
+                continue;
 
             if (!memcmp(pat->pattern, &code[i], pat->len)) {
                 add_token(tokens, &code[i], pat->len, pat->type, line);

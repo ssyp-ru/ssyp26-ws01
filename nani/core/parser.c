@@ -220,6 +220,7 @@ void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos) {
     } else if (tok->type == TOKEN_LEFT_BRACE) {
         stmt->type = STMT_BLOCK;
         stmt_list_t* decls = &stmt->as.block.declarations;
+        decls->items = NULL;
 
         while (get_tok(tokens, pos)->type != TOKEN_RIGHT_BRACE) {
             if (*pos >= tokens->length) {
