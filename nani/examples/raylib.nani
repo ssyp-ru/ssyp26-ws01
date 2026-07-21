@@ -4,6 +4,8 @@ while (!rl_window_should_close()) {
     rl_begin_drawing();
     rl_clear_background(30, 30, 30);
     rl_draw_circle(400, 225, 80, 255, 0, 0);
+    rl_draw_rectangle(400, 225, 80, 80, 0, 255, 0);
+    rl_draw_line(400, 225,600,225, 0, 0, 255);
     rl_end_drawing();
 }
 rl_close_window();

@@ -82,6 +82,25 @@ static value_t native_draw_circle(interpreter_t* interpreter, int line, value_t*
     return nil_value();
 }
 
+static value_t native_draw_rectangle(interpreter_t* interpreter, int line, value_t* arguments, int count) {
+    (void)count;
+    int x = (int)number_argument(interpreter, line, arguments, 0);
+    int y = (int)number_argument(interpreter, line, arguments, 1);
+    float square_size_x = (float)number_argument(interpreter, line, arguments, 2);
+    float square_size_y = (float)number_argument(interpreter, line, arguments, 3);
+    DrawRectangle(x, y, square_size_x, square_size_y, color_arguments(interpreter, line, arguments, 4));
+    return nil_value();
+}
+
+static value_t native_draw_line(interpreter_t* interpreter, int line, value_t* arguments, int count) {
+    (void)count;
+    int start_pos_x = (int)number_argument(interpreter, line, arguments, 0);
+    int start_pos_y = (int)number_argument(interpreter, line, arguments, 1);
+    int end_pos_x = (int)number_argument(interpreter, line, arguments, 2);
+    int end_pos_y = (int)number_argument(interpreter, line, arguments, 3);
+    DrawLine(start_pos_x,start_pos_y,end_pos_x,end_pos_y,color_arguments(interpreter, line, arguments, 4));
+    return nil_value();
+}
 static value_t native_end_drawing(interpreter_t* interpreter, int line, value_t* arguments, int count) {
     (void)interpreter;
     (void)line;
@@ -137,6 +156,8 @@ void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_begin_drawing", 0, native_begin_drawing);
     define_native_function(interpreter, "rl_clear_background", 3, native_clear_background);
     define_native_function(interpreter, "rl_draw_circle", 6, native_draw_circle);
+    define_native_function(interpreter, "rl_draw_rectangle", 7, native_draw_rectangle);
+    define_native_function(interpreter, "rl_draw_line", 7, native_draw_line);
     define_native_function(interpreter, "rl_end_drawing", 0, native_end_drawing);
     define_native_function(interpreter, "rl_wait_time", 1, native_wait_time);
     define_native_function(interpreter, "rl_close_window", 0, native_close_window);
