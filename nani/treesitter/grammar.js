@@ -57,18 +57,9 @@ module.exports = grammar({
     primary: ($) => choice("false", "true", "nil", $.number, $.identifier, seq("(", $.expression, ")")),
 
     comment: ($) => token(seq("//", /[^\n]*/)),
-    //expression: ($) => seq($.number, $.operator, $.number),
 
     identifier: ($) => /[A-Za-z_][A-Za-z0-9]*/,
     number: $ => /\d+(\.\d+)?/,
-    operator: $ => choice($.plus, $.minus, $.multiply, $.divide),
-    plus: $ => "+",
-    minus: $ => "-",
-    multiply: $ => "*",
-    divide: $ => "/",
-
-
-    
-    // string: $ => /"[^"\n]*"/,
+    string: $ => /"[^"\n]*"/,
   },
 });
