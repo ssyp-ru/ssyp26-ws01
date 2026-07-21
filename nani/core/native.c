@@ -119,7 +119,7 @@ static value_t native_readline(interpreter_t* interpreter, int line, value_t* ar
     return nil_value();
 }
 
-value_t native_object() { // ?
+value_t native_object(interpreter_t* interpreter, int line, value_t* arguments, int count) { // ?
     value_t value;
     value.type = VAL_OBJ;
     value.val.object = (obj_t*)malloc(sizeof(obj_t));
