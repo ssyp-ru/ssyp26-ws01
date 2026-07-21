@@ -98,7 +98,7 @@ static value_t native_draw_line(interpreter_t* interpreter, int line, value_t* a
     int start_pos_y = (int)number_argument(interpreter, line, arguments, 1);
     int end_pos_x = (int)number_argument(interpreter, line, arguments, 2);
     int end_pos_y = (int)number_argument(interpreter, line, arguments, 3);
-    DrawLine(start_pos_x,start_pos_y,end_pos_x,end_pos_y,color_arguments(interpreter, line, arguments, 4));
+    DrawLine(start_pos_x, start_pos_y, end_pos_x, end_pos_y, color_arguments(interpreter, line, arguments, 4));
     return nil_value();
 }
 static value_t native_end_drawing(interpreter_t* interpreter, int line, value_t* arguments, int count) {
