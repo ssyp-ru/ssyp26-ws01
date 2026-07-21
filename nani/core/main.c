@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "lexer.h"
 #include "parser.h"
 #include "interpreter.h"
@@ -20,6 +21,7 @@ static char* read_full(FILE* fp) {
 
 int main(int argc, char** argv) {
     log_set_level(LOG_LEVEL_DEBUG);
+    srand(time(NULL));
 
     if (argc != 2) {
         printf("Usage: %s <filename>\n", argv[0]);

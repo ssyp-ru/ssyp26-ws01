@@ -165,6 +165,15 @@ static value_t native_readline(interpreter_t* interpreter, int line, value_t* ar
     return nil_value();
 }
 
+static value_t native_rand(interpreter_t* interpreter, int line, value_t* arguments, int count) {
+    int max = (int)number_argument(interpreter, line, arguments, 0);
+
+    value_t value;
+    value.type = VAL_NUMBER;
+    value.val.number = rand() % max;
+    return value;
+}
+
 value_t native_object(interpreter_t* interpreter, int line, value_t* arguments, int count) { // ?
     value_t value;
     value.type = VAL_OBJ;
@@ -191,6 +200,7 @@ void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_is_key_pressed", 1, native_is_key_pressed);
     define_native_function(interpreter, "rl_draw_text", 7, native_draw_text);
     define_native_function(interpreter, "readline", 0, native_readline);
+    define_native_function(interpreter, "rand", 1, native_rand);
 
     define_native_function(interpreter, "object", 0, native_object);
 }
