@@ -12,6 +12,13 @@ static double number_argument(interpreter_t* interpreter, int line, value_t* arg
     return arguments[index].val.number;
 }
 
+static char* string_argument(interpreter_t* interpreter, int line, value_t* arguments, int index) {
+    if (arguments[index].type != VAL_STRING)
+        rterr(interpreter->code, line, "Expected string argument");
+
+    return arguments[index].val.string->chars;
+}
+
 static unsigned char color_argument(interpreter_t* interpreter, int line, value_t* arguments, int index) {
     double value = number_argument(interpreter, line, arguments, index);
     if (value < 0 || value > 255)
@@ -135,6 +142,16 @@ static value_t native_is_key_pressed(interpreter_t* interpreter, int line, value
     return value;
 }
 
+static value_t native_draw_text(interpreter_t* interpreter, int line, value_t* arguments, int count) {
+    char* text = (char*)string_argument(interpreter, line, arguments, 0);
+    int posX = (int)number_argument(interpreter, line, arguments, 1);
+    int posY = (int)number_argument(interpreter, line, arguments, 2);
+    int fontSize = (int)number_argument(interpreter, line, arguments, 3);
+
+    DrawText(text, posX, posY, fontSize, color_arguments(interpreter, line, arguments, 4));
+    return nil_value();
+}
+
 static value_t native_readline(interpreter_t* interpreter, int line, value_t* arguments, int count) {
     (void)interpreter;
     (void)line;
@@ -172,6 +189,7 @@ void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_wait_time", 1, native_wait_time);
     define_native_function(interpreter, "rl_close_window", 0, native_close_window);
     define_native_function(interpreter, "rl_is_key_pressed", 1, native_is_key_pressed);
+    define_native_function(interpreter, "rl_draw_text", 7, native_draw_text);
     define_native_function(interpreter, "readline", 0, native_readline);
 
     define_native_function(interpreter, "object", 0, native_object);
