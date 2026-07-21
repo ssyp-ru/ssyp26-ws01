@@ -143,8 +143,107 @@ void add_parameter(function_decl_t* declaration, token_t parameter) {
     declaration->parameters[declaration->parameter_count++] = parameter;
 }
 
+static void free_expr(expr_t* expr);
+
+static void free_expr_list(expr_list_t* list) {
+    for (int i = 0; i < list->count; i++) {
+        free_expr(list->items[i]);
+    }
+
+    free(list->items);
+}
+
+void free_expr(expr_t* expr) {
+    switch (expr->type) {
+    case EXPR_GROUPING:
+        free_expr(expr->value.grouping.expression);
+        break;
+    case EXPR_UNARY:
+        free_expr(expr->value.unary.right);
+        break;
+    case EXPR_BINARY:
+        free_expr(expr->value.binary.left);
+        free_expr(expr->value.binary.right);
+        break;
+    case EXPR_LOGICAL:
+        free_expr(expr->value.logical.left);
+        free_expr(expr->value.logical.right);
+        break;
+    case EXPR_ASSIGN:
+        free_expr(expr->value.assign.value);
+        break;
+    case EXPR_CALL:
+        free_expr(expr->value.call.callee);
+        free_expr_list(&expr->value.call.arguments);
+        break;
+    case EXPR_KEY:
+        free_expr(expr->value.key.object);
+        free_expr(expr->value.key.key);
+        break;
+    case EXPR_KEY_SET:
+        free_expr(expr->value.key_set.object);
+        free_expr(expr->value.key_set.key);
+        free_expr(expr->value.key_set.value);
+        break;
+    default:
+        break;
+    }
+
+    free(expr);
+}
+
+static void free_stmt(stmt_t* stmt) {
+    switch (stmt->type) {
+    case STMT_ASSERT:
+        free_expr(stmt->as.assert_stmt.expression);
+        break;
+    case STMT_BLOCK:
+        free_ast(&stmt->as.block.declarations);
+        break;
+    case STMT_EXPRESSION:
+        free_expr(stmt->as.expression.expression);
+        break;
+    case STMT_FOR:
+        free_stmt(stmt->as.for_stmt.initializer);
+        free_expr(stmt->as.for_stmt.condition);
+        free_expr(stmt->as.for_stmt.increment);
+        free_stmt(stmt->as.for_stmt.body);
+        break;
+    case STMT_FUNCTION:
+        free(stmt->as.function.declaration.parameters);
+        free_ast(&stmt->as.function.declaration.body);
+        break;
+    case STMT_IF:
+        free_expr(stmt->as.if_stmt.condition);
+        free_stmt(stmt->as.if_stmt.then_branch);
+        if (stmt->as.if_stmt.else_branch)
+            free_stmt(stmt->as.if_stmt.else_branch);
+        break;
+    case STMT_LET:
+        free_expr(stmt->as.let.initializer);
+        break;
+    case STMT_PRINT:
+        free_expr(stmt->as.print.expression);
+        break;
+    case STMT_RETURN:
+        free_expr(stmt->as.return_stmt.value);
+        break;
+    case STMT_WHILE:
+        free_expr(stmt->as.while_stmt.condition);
+        free_stmt(stmt->as.while_stmt.body);
+        break;
+    }
+
+    free(stmt);
+}
+
 void free_ast(stmt_list_t* ast) {
-    // TODO
+    for (int i = 0; i < ast->count; i++) {
+        stmt_t* stmt = ast->items[i];
+        free_stmt(stmt);
+    }
+
+    free(ast->items);
 }
 
 static void parse_stmt(stmt_t* stmt, tokens_t* tokens, int* pos);

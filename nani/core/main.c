@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     }
 
     FILE* fp = fopen(argv[1], "r");
-    const char* code = read_full(fp);
+    char* code = read_full(fp);
     fclose(fp);
 
     tokens_t tokens = {0};
@@ -44,6 +44,11 @@ int main(int argc, char** argv) {
     for (int i = 0; i < ast.count; i++) {
         interpret(&interpreter, ast.items[i]);
     }
+
+    free_interpreter(&interpreter);
+    free_ast(&ast);
+    free(tokens.ptr);
+    free(code);
 
     return 0;
 }
