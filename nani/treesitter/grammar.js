@@ -54,7 +54,7 @@ module.exports = grammar({
     
     arguments: ($) => seq($.expression, repeat(seq(",", $.expression))),
 
-    primary: ($) => choice("false", "true", "nil", $.number, $.identifier, seq("(", $.expression, ")")),
+    primary: ($) => choice("false", "true", "nil", $.string, $.number, $.identifier, seq("(", $.expression, ")")),
 
     comment: ($) => token(seq("//", /[^\n]*/)),
 

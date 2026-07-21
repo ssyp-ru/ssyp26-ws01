@@ -3,7 +3,6 @@
 
 (comment) @comment
 (number) @number
-(string) @string
 
 ["true" "false"] @boolean
 "nil" @constant.builtin
