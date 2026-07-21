@@ -102,3 +102,8 @@ b["a"] = 3;
 b[1] = "a";
 assert a[10] == 2;
 assert b["a"] == 3;
+
+for (let i = 0; i < 10; i = i + 1) {
+    print i;
+}
+
