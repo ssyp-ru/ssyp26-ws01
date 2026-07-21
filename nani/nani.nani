@@ -1,0 +1,158 @@
+	let screenWidth = 800;
+	let screenHeight = 450;
+	let LinesCountX = 16;
+        let LinesCountY = 9;
+        let cSizeX = screenWidth / LinesCountX;
+        let cSizeY = screenHeight / LinesCountY;
+        let timer = 0;
+        let xf = 2;
+        let yf = 2;
+
+        let zmekax = object();
+        let zmekay = object();
+        zmekax[0] = 0;
+        zmekay[0] = 1;
+        
+        let SnakeCount = 3;     
+
+        let xspeed = 1;
+        let yspeed = 0;
+
+        let gameOver = 0;
+
+        let xP = 0;
+        let yP = 0;
+        let xPe = 50;
+        let yPe = 50;
+
+
+rl_init_window(screenWidth, screenHeight);
+
+while (!rl_window_should_close()) {
+    
+	timer = timer + 0.2;	
+	 if(zmekay[0] > LinesCountY)
+        {
+                zmekay[0] = 0;
+                gameOver = 1;
+        }
+        if(zmekay[0] < 0)
+        {
+                zmekay[0] = 8;
+                gameOver = 1;
+        }
+	if(zmekax[0] > LinesCountX )
+        {
+                zmekax[0] = 0;
+                gameOver = 1;
+        }
+        if(zmekax[0] < 0)
+        {
+                zmekax[0] = 15;
+                gameOver = 1;
+        }
+	
+ 	let KeyRight = 262;
+    	let KeyLeft = 263;
+    	let KeyDown = 264;
+    	let KeyUp = 265;
+          if (rl_is_key_pressed(KeyRight))     {xspeed = 1;  yspeed = 0;}
+          if (rl_is_key_pressed(KeyLeft))      {xspeed = -1; yspeed = 0;}
+          if (rl_is_key_pressed(KeyDown))      {xspeed = 0;  yspeed = 1;}
+          if (rl_is_key_pressed(KeyUp))        {xspeed = 0;  yspeed = -1;}
+	for(let i = 1; i < SnakeCount;i = i + 1)
+        {
+                if(zmekax[0] == zmekax[i] && zmekay[0] == zmekay[i])
+                {
+                        gameOver = 1;
+                }
+        }
+	 if (timer > 0.5)
+        {
+                let newHeadX = zmekax[0] + xspeed;
+                let newHeadY = zmekay[0] + yspeed;
+                if(newHeadX == xf && newHeadY == yf)
+                {
+                        timerL = 1;
+                for(int i = 1; i < SnakeCount;i = i + 1)
+                {
+                        if(zmekax[0] == zmekax[i] && zmekay[0] == zmekay[i])
+                        {
+                                gameOver = 1;
+                        }
+                }
+                        SnakeCount = SnakeCount + 1;
+                        yf = 1 +  rand(8);
+                        xf = 1 +  rand(16);
+
+                }
+		for(int i = 0;i > SnakeCount; i = i + 1)
+                {
+                        if(xf == zmekax[i])
+                        {
+                        xf = 1 +  rand(15);
+                        }
+                        if(yf == zmekay[i])
+                        {
+                        yf = 1 + rand(8);
+                        }
+                }
+
+                for (int i = SnakeCount - 1; i > 0; i = i - 1)
+                {
+                        zmekax[i] = zmekax[i - 1];
+                        zmekay[i] = zmekay[i - 1];
+                }
+                zmekax[0] = newHeadX;
+                zmekay[0] = newHeadY;
+
+
+                timer = 0;
+
+        }
+
+
+
+    rl_begin_drawing();
+    rl_clear_background(0, 100, 0);
+    let foodX = cSizeX * xf;
+        let foodY = cSizeY * yf;
+        DrawRectangle(foodX,foodY, 30, 30,RED);
+        for(let i = 0;i < SnakeCount;i = i + 1)
+        {
+        //      xe += 50;
+                DrawRectangle(cSizeX * zmekax[i],cSizeY * zmekay[i] ,50 , 50, BLUE);
+//              SnakeCount = SnakeCount + 1;
+        }
+        if(gameOver == 1)
+        {
+        DrawRectangle(0,0, 900, 500,GRAY);
+        DrawText("GAME OVER", 60, 180, 100, BLACK);
+        DrawText("press 'space' for already to play", 60, 270, 20, BLACK);
+        DrawText("-Is this correct?", 60, 300, 20, 0, 0, 0);
+        DrawText("-I dont think so", 60, 330, 20, BLACK);
+        }
+        if(IsKeyDown(KEY_SPACE) && gameOver == 1)
+        {
+                gameOver = 0;
+                SnakeCount = 1;
+                zmekax[0] = 0;
+                zmekay[0] = 0;
+                xspeed = 1;
+                yspeed = 0;
+	}
+    let x = 50;
+    let y = 50;
+    for(let i = 0; i < LinesCountX; i = i + 1)
+    {
+    rl_draw_line(x, 0,x,800, 0,255,0);
+    x = x + 50;
+    }
+    for(let i = 0; i < LinesCountY; i = i + 1)
+    {
+    rl_draw_line(0, y,800,y, 0,255,0);
+    y = y + 50;
+    }
+    rl_end_drawing();
+}
+rl_close_window();

@@ -1,0 +1,172 @@
+
+	rl_init_window(800,400); 
+	int LinesCountX = 16;
+        int LinesCountY = 9;
+        int cSizeX = screenWidth / LinesCountX;
+        int cSizeY = screenHeight / LinesCountY;
+        float timer = 0;
+        float xf = 2;
+        float yf = 2;
+
+        float zmekax[100];
+        float zmekay[100];
+        zmekax[0] = 0;
+        zmekay[0] = 1;
+        
+        int SnakeCount = 3;     
+
+        int xspeed = 1;
+        int yspeed = 0;
+
+        int gameOver = 0;
+
+        float xP = 0;
+        float yP = 0;
+        float xPe = 50;
+        float yPe = 50;
+
+
+while (!rl_window_should_close()) {
+     
+	 float timerL = 0.5;
+         int mX = GetMouseX();
+         timer += GetFrameTime();
+         const float distance = speed * GetFrameTime();
+         int mY = GetMouseY() ;
+          if (IsKeyDown(KEY_RIGHT))     {xspeed = 1;  yspeed = 0;}
+          if (IsKeyDown(KEY_LEFT))      {xspeed = -1; yspeed = 0;}
+          if (IsKeyDown(KEY_DOWN))      {xspeed = 0;  yspeed = 1;}
+          if (IsKeyDown(KEY_UP))        {xspeed = 0;  yspeed = -1;}
+        int ForceR = 0;
+
+        if(zmekay[0] > LinesCountY)
+        {
+                zmekay[0] = 0;
+                gameOver = 1;
+        }
+        if(zmekay[0] < 0)
+        {
+                zmekay[0] = 8;
+                gameOver = 1;
+        }
+	 if(zmekax[0] > LinesCountX )
+        {
+                zmekax[0] = 0;
+                gameOver = 1;
+        }
+        if(zmekax[0] < 0)
+        {
+                zmekax[0] = 15;
+                gameOver = 1;
+        }
+
+        for(int i = 1; i < SnakeCount;i++)
+        {
+                if(zmekax[0] == zmekax[i] && zmekay[0] == zmekay[i])
+                {
+                        gameOver = 1;
+                }
+        }
+        if(timerL == 1)
+        {
+
+        }
+        if (timer > timerL)
+        {
+                int newHeadX = zmekax[0] + xspeed;
+                int newHeadY = zmekay[0] + yspeed;
+                if(newHeadX == xf && newHeadY == yf)
+                {
+                        timerL = 1;
+                for(int i = 1; i < SnakeCount;i++)
+                {
+		       if(zmekax[0] == zmekax[i] && zmekay[0] == zmekay[i])
+                        {
+                                gameOver = 1;
+                        }
+                }
+                        if(timerL < 0.2)
+                        {
+                                timerL = 0.2;
+                        }
+                        SnakeCount++;
+                        yf = 1 +  rand() %( 7 - 1 + 1);
+                        xf = 1 +  rand() % (15 - 1 + 1);
+
+                }
+		for(int i = 0;i > SnakeCount; i++)
+                {
+                        if(xf == zmekax[i])
+                        {
+                        xf = 1 +  rand() % (15 - 1 + 1);
+                        }
+                        if(yf == zmekay[i])
+                        {
+                        yf = 1 +  rand() % (7 - 1 + 1);
+                        }
+                }
+
+                for (int i = SnakeCount - 1; i > 0; i--)
+                {
+                        zmekax[i] = zmekax[i - 1];
+                        zmekay[i] = zmekay[i - 1];
+                }
+		zmekax[0] = newHeadX;
+                zmekay[0] = newHeadY;
+
+
+                timer = 0;
+
+        }
+
+
+        rl_begin_drawing();
+    	rl_clear_background(30, 30, 30);
+        for(int i = 0; i < LinesCountX; i++)
+        {
+                int x = i * cSizeX;
+                rl_draw_line(x, 0, x, screenHeight, GREEN);
+        }
+
+        for(int i = 0; i < LinesCountY; i++)
+        {
+                int y = i * cSizeY;
+                rl_draw_line(0, y, screenWidth, y, GREEN);
+        }
+        int foodX = cSizeX * xf;
+	int foodX = cSizeX * xf;
+        int foodY = cSizeY * yf;
+        rl_draw_rectangle(foodX,foodY, 30, 30,RED);
+        for(int i = 0;i < SnakeCount;i++ )
+        {
+                rl_draw_rectangle(cSizeX * zmekax[i],cSizeY * zmekay[i] ,50 , 50, BLUE);
+        }
+        if(gameOver == 1)
+        {
+        rl_draw_rectangle(0,0, 900, 500,GRAY);
+        DrawText("GAME OVER", 60, 180, 100, BLACK);
+        DrawText("press 'space' for already to play", 60, 270, 20, BLACK);
+        DrawText("-Is this correct?", 60, 300, 20, BLACK);
+        DrawText("-I dont think so", 60, 330, 20, BLACK);
+        }
+        if(IsKeyDown(KEY_SPACE) && gameOver == 1)
+        {
+                gameOver = 0;
+                SnakeCount = 1;
+                zmekax[0] = 0;
+                zmekay[0] = 0;
+                xspeed = 1;
+                yspeed = 0;
+        }
+        EndDrawing();
+    }
+    CloseWindow();
+    return 0;
+}
+
+
+
+    rl_draw_line(400, 225,600,225, 0, 0, 255);
+    rl_end_drawing();
+}
+rl_close_window();
