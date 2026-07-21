@@ -27,7 +27,8 @@ all: build
 build: nani
 
 clean:
-	rm -f nani *.o
+	rm -f calc *.o
+	rm nani
 	$(MAKE) -C $(RAYLIB_DIR) clean
 
 nani: $(OBJECTS) raylib
