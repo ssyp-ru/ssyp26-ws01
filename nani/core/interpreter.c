@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include "c_utils/utils.h"
 #include "parser.h"
 #include "value.h"
 #include "lexer.h"
@@ -66,8 +67,11 @@ void define_variable(variable_list_t* variables, token_t name, value_t value) {
 
 void free_variables(variable_list_t* variables) {
     for (int i = 0; i < variables->count; i++) {
-        free(variables->variables[i].name);
+        variable_t* var = &variables->variables[i];
+        free(var->name);
+        free_value(&var->value);
     }
+
     free(variables->variables);
 }
 
@@ -365,6 +369,9 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
             assert(false);
         }
 
+        free_value(&left);
+        free_value(&right);
+
         return val;
     }
 
@@ -392,6 +399,7 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
     case STMT_PRINT: {
         value_t val = eval(interpreter, locals, stmt->as.print.expression);
         print_value(&val);
+        free_value(&val);
         return 0;
     }
     case STMT_ASSERT: {
@@ -454,4 +462,13 @@ int execute_statement(interpreter_t* interpreter, variable_list_t* locals, stmt_
 void interpret(interpreter_t* interpreter, stmt_t* stmt) {
     value_t return_value;
     execute_statement(interpreter, NULL, stmt, &return_value);
+}
+
+void free_interpreter(interpreter_t* interpreter) {
+    for (int i = 0; i < interpreter->function_count; i++) {
+        free(interpreter->functions[i].name);
+    }
+
+    free(interpreter->functions);
+    free_variables(&interpreter->globals);
 }

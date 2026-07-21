@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 
 value_t nil_value() {
     value_t value;
@@ -63,5 +64,16 @@ void print_value(value_t* val) {
     case VAL_OBJ:
         // TODO(OBJ):
         assert(false);
+    }
+}
+
+void free_value(value_t* val) {
+    switch (val->type) {
+    case VAL_STRING:
+        free(val->val.string->chars);
+        free(val->val.string);
+        break;
+    default:
+        break;
     }
 }
