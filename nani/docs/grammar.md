@@ -59,7 +59,7 @@ declaration    → fnDecl
 
 fnDecl         → "fn" function ;
 function       → IDENTIFIER "(" parameters? ")" block ;
-parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
+parameters     → IDENTIFIER ( "," IDENTIFIER )*
 
 letDecl        → "let" IDENTIFIER ( "=" expression )? ";" ;
 
