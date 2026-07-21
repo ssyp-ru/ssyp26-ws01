@@ -129,3 +129,12 @@ obj_3["ggggg"] = "ffffff";
 assert obj_1 == obj_2;
 assert obj_1 != obj_3;
 
+print "Random numbers:";
+print rand(100);
+print rand(100);
+print rand(100);
+print rand(100);
+print rand(100);
+print rand(100);
+print rand(100);
+
