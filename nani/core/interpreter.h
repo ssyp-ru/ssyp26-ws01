@@ -26,5 +26,6 @@ struct interpreter_t {
 
 void define_native_function(interpreter_t* interpreter, const char* name, int arity, native_function_t function);
 void interpret(interpreter_t* interpreter, stmt_t* stmt);
+void free_interpreter(interpreter_t* interpreter);
 
 #endif

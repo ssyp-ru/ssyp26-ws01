@@ -158,6 +158,7 @@ struct stmt_t {
     } as;
 };
 
+void free_ast(stmt_list_t* ast);
 void parse_program(stmt_list_t* ast, tokens_t* tokens);
 
 #endif
