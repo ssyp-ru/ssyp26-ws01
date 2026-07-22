@@ -32,8 +32,10 @@ typedef struct {
     value_t value;
 } map_entry_t;
 
+typedef struct vars_t vars_t;
+
 typedef struct obj_t {
-    map_entry_t* entries;
+    vars_t* entries;
     int count;
     int capacity;
 } obj_t;

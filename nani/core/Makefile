@@ -17,8 +17,8 @@ ifeq ($(SANITIZE),1)
 CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 LFLAGS += -fsanitize=address -fno-omit-frame-pointer
 endif
-HEADERS := common.h lexer.h value.h parser.h interpreter.h native.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
-OBJECTS := main.o lexer.o parser.o value.o interpreter.o native.o utils.o common.o
+HEADERS := common.h lexer.h value.h hash.h parser.h interpreter.h native.h codegen.h $(VENDOR_DIR)/c_utils/utils.h
+OBJECTS := main.o lexer.o parser.o value.o hash.o interpreter.o native.o utils.o common.o
 
 .PHONY: all build clean raylib
 
@@ -47,6 +47,9 @@ parser.o: parser.c $(HEADERS)
 
 value.o: value.c $(HEADERS)
 	$(CC) $(CFLAGS) -c value.c
+
+hash.o: hash.c $(HEADERS)
+	$(CC) $(CFLAGS) -c hash.c
 
 interpreter.o: interpreter.c $(HEADERS)
 	$(CC) $(CFLAGS) -c interpreter.c

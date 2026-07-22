@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include "hash.h"
 #include "parser.h"
 #include "value.h"
 #include "lexer.h"
@@ -228,23 +229,11 @@ value_t call_function(interpreter_t* interpreter, variable_list_t* locals, expr_
 }
 
 void add_to_object(value_t* object, value_t key, value_t value) {
-    for (int i = 0; i < object->val.object->count; i++) {
-        if (val_equal(&((object->val.object->entries)[i].key), &key)) {
-            (object->val.object->entries)[i].value = value;
-            return;
-        }
-    }
-    if (object->val.object->count == object->val.object->capacity) {
-        map_entry_t* list_new = (map_entry_t*)malloc(2 * object->val.object->capacity * sizeof(map_entry_t));
-        object->val.object->capacity *= 2;
-        for (int i = 0; i < object->val.object->count; i++) {
-            list_new[i] = (object->val.object->entries)[i];
-        }
-        object->val.object->entries = list_new;
-    }
-    ((object->val.object->entries)[object->val.object->count]).key = key;
-    ((object->val.object->entries)[object->val.object->count]).value = value;
-    (object->val.object->count)++;
+    map_entry_t entry;
+    entry.key = key;
+    entry.value = value;
+    put(object->val.object->entries, entry);
+    object->val.object->count = object->val.object->entries->count;
 }
 
 value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) {
@@ -300,17 +289,7 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
     if (expr->type == EXPR_KEY) { // ?
         value_t key = eval(interpreter, locals, expr->value.key.key);
         value_t object = eval(interpreter, locals, expr->value.key.object);
-        int count = object.val.object->count;
-        map_entry_t* list = object.val.object->entries;
-        for (int i = 0; i < count; i++) {
-            if (val_equal(&list[i].key, &key)) {
-                return list[i].value;
-            }
-        }
-        value_t value;
-        value.type = VAL_NIL;
-        return value;
-        // error?
+        return get(object.val.object->entries, key);
     }
     if (expr->type == EXPR_KEY_SET) {
         value_t key = eval(interpreter, locals, expr->value.key_set.key);
