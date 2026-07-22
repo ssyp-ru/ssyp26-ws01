@@ -414,8 +414,20 @@ value_t eval(interpreter_t* interpreter, variable_list_t* locals, expr_t* expr) 
             val.val.boolean = left.val.number >= right.val.number;
             break;
 
+        case TOKEN_AND:
+            if (left.type != VAL_BOOL || right.type != VAL_BOOL)
+                rterr(interpreter->code, expr->line, "logical and with non-bool");
+            val.val.boolean = left.val.boolean && right.val.boolean;
+            break;
+
+        case TOKEN_OR:
+            if (left.type != VAL_BOOL || right.type != VAL_BOOL)
+                rterr(interpreter->code, expr->line, "logical and with non-bool");
+            val.val.boolean = left.val.boolean || right.val.boolean;
+            break;
+
         default:
-            assert(false);
+            assert(false && "unknown logical token");
         }
 
         free_value(&left);
