@@ -1,4 +1,5 @@
 #include "native.h"
+#include "value.h"
 
 #include <raylib/src/raylib.h>
 
@@ -152,6 +153,12 @@ static value_t native_draw_text(interpreter_t* interpreter, int line, value_t* a
     return nil_value();
 }
 
+static value_t native_get_frame_time(interpreter_t* interpreter, int line, value_t* arguments, int count) {
+
+    float time = GetFrameTime();
+    return number_value(time);
+}
+
 static value_t native_readline(interpreter_t* interpreter, int line, value_t* arguments, int count) {
     (void)interpreter;
     (void)line;
@@ -199,6 +206,7 @@ void register_native_functions(interpreter_t* interpreter) {
     define_native_function(interpreter, "rl_close_window", 0, native_close_window);
     define_native_function(interpreter, "rl_is_key_pressed", 1, native_is_key_pressed);
     define_native_function(interpreter, "rl_draw_text", 7, native_draw_text);
+    define_native_function(interpreter, "rl_get_frame_time", 0, native_get_frame_time);
     define_native_function(interpreter, "readline", 0, native_readline);
     define_native_function(interpreter, "rand", 1, native_rand);
 

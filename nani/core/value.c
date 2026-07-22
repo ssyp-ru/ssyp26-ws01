@@ -12,6 +12,13 @@ value_t nil_value() {
     return value;
 }
 
+value_t number_value(float n) {
+    value_t value;
+    value.type = VAL_NUMBER;
+    value.val.number = n;
+    return value;
+}
+
 static int obj_find(obj_t* obj, value_t* key) {
     for (int i = 0; i < obj->count; i++) {
         map_entry_t* entry = &obj->entries[i];
