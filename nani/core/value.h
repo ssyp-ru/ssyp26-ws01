@@ -39,6 +39,7 @@ typedef struct obj_t {
 } obj_t;
 
 value_t nil_value();
+value_t number_value(float n);
 bool val_equal(value_t* a, value_t* b);
 void print_value(value_t* val);
 void free_value(value_t* val);
