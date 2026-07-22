@@ -1,4 +1,5 @@
 #include "value.h"
+#include "hash.h"
 #include "c_utils/utils.h"
 
 #include <stdio.h>
@@ -20,29 +21,22 @@ value_t number_value(float n) {
 }
 
 static int obj_find(obj_t* obj, value_t* key) {
-    for (int i = 0; i < obj->count; i++) {
-        map_entry_t* entry = &obj->entries[i];
-
-        if (val_equal(&entry->key, key))
-            return i;
-    }
-
-    return -1;
+    return has_key(obj->entries, *key);
 }
 
 static bool obj_equal(obj_t* a, obj_t* b) {
     if (a->count != b->count)
         return false;
 
-    for (int i = 0; i < a->count; i++) {
-        map_entry_t* entry_a = &a->entries[i];
+    for (int i = 0; i < HASH_SIZE; i++) {
+        for (node_t* node = a->entries->p[i]; node != NULL; node = node->next) {
+            if (!obj_find(b, &node->value.key))
+                return false;
 
-        int idx_b = obj_find(b, &entry_a->key);
-        if (idx_b == -1)
-            return false;
-
-        if (!val_equal(&entry_a->value, &b->entries[idx_b].value))
-            return false;
+            value_t value = get(b->entries, node->value.key);
+            if (!val_equal(&node->value.value, &value))
+                return false;
+        }
     }
 
     return true;
@@ -93,17 +87,19 @@ void print_value(value_t* val) {
         break;
 
     case VAL_OBJ:
-        // TODO(OBJ):
         printf("print_object:\n");
         printf("count = %d\n", val->val.object->count);
         printf("capacity = %d\n", val->val.object->capacity);
-        for (int i = 0; i < val->val.object->count; i++) {
-            printf("key: ");
-            print_value(&val->val.object->entries[i].key);
-            printf("value: ");
-            print_value(&val->val.object->entries[i].value);
-            printf("\n");
+        for (int i = 0; i < HASH_SIZE; i++) {
+            for (node_t* node = val->val.object->entries->p[i]; node != NULL; node = node->next) {
+                printf("key: ");
+                print_value(&node->value.key);
+                printf("value: ");
+                print_value(&node->value.value);
+                printf("\n");
+            }
         }
+        break;
     }
 }
 

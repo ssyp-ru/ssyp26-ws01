@@ -1,4 +1,5 @@
 #include "native.h"
+#include "hash.h"
 #include "value.h"
 
 #include <raylib/src/raylib.h>
@@ -185,9 +186,10 @@ value_t native_object(interpreter_t* interpreter, int line, value_t* arguments, 
     value_t value;
     value.type = VAL_OBJ;
     value.val.object = (obj_t*)malloc(sizeof(obj_t));
-    value.val.object->entries = (map_entry_t*)malloc(4 * sizeof(map_entry_t));
+    value.val.object->entries = (vars_t*)malloc(sizeof(vars_t));
+    create_varlist(value.val.object->entries);
     value.val.object->count = 0;
-    value.val.object->capacity = 4;
+    value.val.object->capacity = HASH_SIZE;
     return value;
 }
 
