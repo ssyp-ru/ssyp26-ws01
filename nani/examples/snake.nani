@@ -25,6 +25,14 @@ let yP = 0;
 let xPe = 50;
 let yPe = 50;
 
+let KeyRight = 262;
+let KeyLeft = 263;
+let KeyDown = 264;
+let KeyUp = 265;
+let KeySpace = 32;
+let KeyP = 80;
+let pause = false;
+
 rl_init_window(screenWidth, screenHeight);
 
 while (!rl_window_should_close()) {
@@ -50,15 +58,11 @@ while (!rl_window_should_close()) {
         gameOver = 1;
     }
 
-    let KeyRight = 262;
-    let KeyLeft = 263;
-    let KeyDown = 264;
-    let KeyUp = 265;
-    let KeySpace = 32;
     if (rl_is_key_pressed(KeyRight))     {xspeed = 1;  yspeed = 0;}
     if (rl_is_key_pressed(KeyLeft))      {xspeed = -1; yspeed = 0;}
     if (rl_is_key_pressed(KeyDown))      {xspeed = 0;  yspeed = 1;}
     if (rl_is_key_pressed(KeyUp))        {xspeed = 0;  yspeed = -1;}
+    if (rl_is_key_pressed(KeyP))         { pause = !pause; }
     for(let i = 1; i < SnakeCount;i = i + 1)
     {
         if(zmekax[0] == zmekax[i] and zmekay[0] == zmekay[i])
@@ -66,7 +70,7 @@ while (!rl_window_should_close()) {
             gameOver = 1;
         }
     }
-    if (timer > 0.25)
+    if (timer > 0.25 and !pause)
     {
         let newHeadX = zmekax[0] + xspeed;
         let newHeadY = zmekay[0] + yspeed;
