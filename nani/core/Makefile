@@ -1,4 +1,5 @@
 CC := gcc
+AR := ar
 VENDOR_DIR := ../../vendor
 RAYLIB_DIR := $(VENDOR_DIR)/raylib/src
 RAYLIB_LIB := $(RAYLIB_DIR)/libraylib.a
@@ -12,6 +13,11 @@ endif
 ifeq ($(UNAME_S),Linux)
 RAYLIB_LFLAGS := -lGL -lc -lm -lpthread -ldl -lrt -lX11
 endif
+ifeq ($(WINDOWS),1)
+RAYLIB_LFLAGS := -lm -mwindows -m64 -luser32 -lwinmm -lopengl32
+CC := x86_64-w64-mingw32-gcc
+AR := x86_64-w64-mingw32-ar
+endif
 
 ifeq ($(SANITIZE),1)
 CFLAGS += -fsanitize=address -fno-omit-frame-pointer
@@ -24,17 +30,29 @@ OBJECTS := main.o lexer.o parser.o value.o hash.o interpreter.o native.o utils.o
 
 all: build
 
+ifeq ($(WINDOWS),1)
+build: nani.exe
+else
 build: nani
+endif
 
 clean:
-	rm -f nani *.o
+	rm -f nani.exe nani *.o
 	$(MAKE) -C $(RAYLIB_DIR) clean
 
+ifeq ($(WINDOWS),1)
+nani.exe: $(OBJECTS) raylib
+	$(CC) $(LFLAGS) -o nani.exe $(OBJECTS) $(RAYLIB_LIB) $(RAYLIB_LFLAGS)
+
+raylib:
+	$(MAKE) -C $(RAYLIB_DIR) RAYLIB_BUILD_MODE=DEBUG TARGET_PLATFORM=PLATFORM_DESKTOP_WIN32 CC=$(CC) AR=$(AR)
+else
 nani: $(OBJECTS) raylib
 	$(CC) $(LFLAGS) -o nani $(OBJECTS) $(RAYLIB_LIB) $(RAYLIB_LFLAGS)
 
 raylib:
 	$(MAKE) -C $(RAYLIB_DIR) RAYLIB_BUILD_MODE=DEBUG
+endif
 
 main.o: main.c $(HEADERS)
 	$(CC) $(CFLAGS) -c main.c
